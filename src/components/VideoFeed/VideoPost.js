@@ -184,8 +184,8 @@ function VideoPost() {
     const fetchVideoUrl = async () => {
       if (post && post.video) {
         try {
-          const storageRef = storage.ref().child(post.video);
-          const url = await storageRef.getDownloadURL();
+          const storageRef = ref(storage, post.video);
+          const url = await getDownloadURL(storageRef);
           console.log(url);
           setVideoUrl(url);
         } catch (error) {
@@ -193,6 +193,10 @@ function VideoPost() {
         }
       }
     };
+  
+    fetchVideoUrl();
+  }, [post, storage]);  // Add `storage` to the dependency array
+
 
     fetchVideoUrl();
   }, [post]);
