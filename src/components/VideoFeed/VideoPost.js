@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import "./VideoFeed.css";
 import { Card } from 'react-bootstrap';
 import AppNavbar from "../Navbar/Navbar";
-import { storage } from "../../firebase";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import "./VideoPost.css";
 import { useEffect, useState } from "react";
