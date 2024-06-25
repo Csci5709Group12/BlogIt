@@ -173,12 +173,12 @@ function VideoPost() {
 
   const post = blogContent[id];
 
-  const storage = getStorage();
-  getDownloadURL(ref(storage, post.video))
-    .then((url) => {
-      console.log(url);
-      setVideoUrl(url);
-    });
+  // const storage = getStorage();
+  // getDownloadURL(ref(storage, post.video))
+  //   .then((url) => {
+  //     console.log(url);
+  //     setVideoUrl(url);
+  //   });
 
   useEffect(() => {
     const fetchVideoUrl = async () => {
