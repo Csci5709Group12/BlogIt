@@ -1,4 +1,5 @@
 import { Button, Card, CardBody, Container, Col, Image, Row, ListGroup } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import AppNavbar from '../Navbar/Navbar';
 import BlogFeedItem from '../BlogFeed/BlogFeedItem';
 import postLogo from '../../assets/post_icon.svg';
