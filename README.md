@@ -4,7 +4,7 @@ Our project BlogIt is a comprehensive community-based blogging platform. This pl
 
 - _Date Created_: 12 Jun 2024
 - _Last Modification Date_: 24 Jun 2024
-- _Lab URL_:
+- _Lab URL_: https://grp12-blogit.netlify.app/
 - _Git URL_: https://git.cs.dal.ca/kottur/csci-5709-group-12
 
 ## Authors
