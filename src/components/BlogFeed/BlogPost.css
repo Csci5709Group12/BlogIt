@@ -1,0 +1,17 @@
+.center-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+  }
+  
+  .center-card .card {
+    width: 90%;
+    max-width: 800px;
+  }
+  
+  .card-img-top {
+    max-width: 100%;
+    height: auto;
+  }
+  
