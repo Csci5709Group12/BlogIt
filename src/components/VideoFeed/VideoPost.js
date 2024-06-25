@@ -197,10 +197,6 @@ function VideoPost() {
     fetchVideoUrl();
   }, [post, storage]);  // Add `storage` to the dependency array
 
-
-    fetchVideoUrl();
-  }, [post]);
-
   if (!post) {
     return <div>Video post not found</div>;
   }
