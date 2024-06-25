@@ -9,8 +9,8 @@ import { useEffect, useState } from "react";
 
 function VideoPost() {
   const { id } = useParams();
-
   const [videoUrl, setVideoUrl] = useState("");
+  const storage = getStorage();  // Initialize Firebase storage
 
   const blogContent = {
     1: {
