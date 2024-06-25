@@ -1,4 +1,3 @@
-import { useParams, Link } from 'react-router-dom';
 import { Button, Card, CardBody, Container, Col, Image, Row, ListGroup } from 'react-bootstrap';
 import AppNavbar from '../Navbar/Navbar';
 import BlogFeedItem from '../BlogFeed/BlogFeedItem';
@@ -9,9 +8,7 @@ import birthdayIcon from '../../assets/birthday_icon.svg';
 import communityIcon from '../../assets/community_icon.svg';
 
 function UserProfile() {
-  // Will be required later to fetch user details based on username and display it below
-  // const { username } = useParams();
-  const userBlogItems = [
+   const userBlogItems = [
     { id: 1, title: "Blog Post 1", summary: "Summary of blog post 1" },
     { id: 2, title: "Blog Post 2", summary: "Summary of blog post 2" },
     { id: 3, title: "Blog Post 3", summary: "Summary of blog post 3" },
