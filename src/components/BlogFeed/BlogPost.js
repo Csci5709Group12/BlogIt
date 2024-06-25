@@ -1,8 +1,9 @@
 import { useParams } from "react-router-dom";
-import "./BlogFeed.css";
 import { Card } from "react-bootstrap";
 import AppNavbar from "../Navbar/Navbar";
+
 import "./BlogPost.css";
+import "./BlogFeed.css";
 
 function BlogPost() {
   const { id } = useParams();

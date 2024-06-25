@@ -2,11 +2,13 @@ import { Card, Col, Image, Row, OverlayTrigger, Popover } from "react-bootstrap"
 import { useState, useContext, useEffect } from "react";
 import bookmarkWhite from "../../assets/bookmark-white.png";
 import bookmarkBlack from "../../assets/bookmark-black.png";
-import "./BlogFeedItem.css";
 import { BookmarkContext } from "../../context/BookmarkContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+import "./BlogFeedItem.css";
 
 function BlogFeedItem({ post }) {
+  const navigate = useNavigate();
   const { bookmarkedPosts, handleBookmarkToggle } = useContext(BookmarkContext);
   const [bookmarked, setBookmarked] = useState(false);
   const [userPopupShow, setUserPopupShow] = useState(false);
@@ -32,7 +34,7 @@ function BlogFeedItem({ post }) {
 
   const handleItemClick = () => {
     const url = `/blog/${post.id}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+    navigate(url);
   };
 
   return (
