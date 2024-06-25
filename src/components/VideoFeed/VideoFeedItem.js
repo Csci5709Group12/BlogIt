@@ -1,11 +1,13 @@
+import { useNavigate } from 'react-router-dom';
 import { Card } from 'react-bootstrap';
 import './VideoFeedItem.css';
 
 function VideoFeedItem({ video }) {
+  const navigate = useNavigate();
 
   const handleItemClick = () => {
     const url = `/videos/${video.id}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+    navigate(url);
   };
 
   return (

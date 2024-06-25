@@ -1,16 +1,19 @@
 
 import { useParams } from "react-router-dom";
-import "./VideoFeed.css";
 import { Card } from 'react-bootstrap';
-import AppNavbar from "../Navbar/Navbar";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
-import "./VideoPost.css";
+import { storage } from "../../firebase";
+import { ref, getDownloadURL } from "firebase/storage";
 import { useEffect, useState } from "react";
+
+import AppNavbar from "../Navbar/Navbar";
+
+import "./VideoPost.css";
+import "./VideoFeed.css";
 
 function VideoPost() {
   const { id } = useParams();
+
   const [videoUrl, setVideoUrl] = useState("");
-  const storage = getStorage();  // Initialize Firebase storage
 
   const blogContent = {
     1: {
@@ -173,19 +176,18 @@ function VideoPost() {
 
   const post = blogContent[id];
 
-  // const storage = getStorage();
-  // getDownloadURL(ref(storage, post.video))
-  //   .then((url) => {
-  //     console.log(url);
-  //     setVideoUrl(url);
-  //   });
+  getDownloadURL(ref(storage, post.video))
+    .then((url) => {
+      console.log(url);
+      setVideoUrl(url);
+    });
 
   useEffect(() => {
     const fetchVideoUrl = async () => {
       if (post && post.video) {
         try {
-          const storageRef = ref(storage, post.video);
-          const url = await getDownloadURL(storageRef);
+          const storageRef = storage.ref().child(post.video);
+          const url = await storageRef.getDownloadURL();
           console.log(url);
           setVideoUrl(url);
         } catch (error) {
@@ -193,9 +195,9 @@ function VideoPost() {
         }
       }
     };
-  
+
     fetchVideoUrl();
-  }, [post, storage]);  // Add `storage` to the dependency array
+  }, [post]);
 
   if (!post) {
     return <div>Video post not found</div>;
