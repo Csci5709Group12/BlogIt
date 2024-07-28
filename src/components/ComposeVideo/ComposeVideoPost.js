@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
@@ -14,6 +14,7 @@ import "react-toastify/dist/ReactToastify.css";
 import './ComposeVideoPost.css';
 import '../common.css';
 import { useNavigate } from 'react-router-dom';
+import { CurrentUserDataContext } from '../../App';
 
 function ComposeVideo() {
   const [value, setValue] = useState("");
@@ -24,6 +25,8 @@ function ComposeVideo() {
   const [selectedTags, setSelectedTags] = useState([]);
   const [videoDuration, setVideoDuration] = useState("");
   const [thumbnailBlob, setThumbnailBlob] = useState(null);
+
+  const { currentUserData, setCurrentUserData } = useContext(CurrentUserDataContext);
 
   const navigate = useNavigate();
 
@@ -58,7 +61,7 @@ function ComposeVideo() {
     videoElement.src = URL.createObjectURL(file);
   };
 
-  const tags = ["web", "java", "react", "android", "programming"];
+  const tags = ["web", "java", "react", "android", "programming", "blogging"];
 
   const removeVideo = () => {
     setSelectedVideo(null);
@@ -121,7 +124,7 @@ function ComposeVideo() {
 
         const postContent = value;
 
-        createVideoPost(maxId + 1, videoURL, title, "author", selectedTags, videoDuration, thumbnailURL, postContent, handleSuccess, handleError);
+        createVideoPost(maxId + 1, videoURL, title, currentUserData._id, selectedTags, videoDuration, thumbnailURL, postContent, handleSuccess, handleError);
       } catch (error) {
         console.error("Error uploading post: ", error);
         handleError(error);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
@@ -6,11 +6,15 @@ import ReactQuill from 'react-quill';
 import { Autocomplete, TextField, Chip } from '@mui/material';
 import { ToastContainer, toast } from "react-toastify";
 import CreatePostNavbar from '../Navbar/CreatePostNavbar';
-
+import { storage } from "../../firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { CurrentUserDataContext } from '../../App';
 import 'react-quill/dist/quill.snow.css';
 import "react-toastify/dist/ReactToastify.css";
 import './ComposeBlogPost.css';
 import '../common.css';
+import { createBlogPost, getMaxId } from '../../api/Blog';
+import { useNavigate } from 'react-router-dom';
 
 function ComposeBlog() {
   const [value, setValue] = useState("");
@@ -19,6 +23,8 @@ function ComposeBlog() {
   const [titleError, setTitleError] = useState("");
   const [contentError, setContentError] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
+  const { currentUserData, setCurrentUserData } = useContext(CurrentUserDataContext);
+  const navigate = useNavigate();
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -39,7 +45,18 @@ function ComposeBlog() {
     setSelectedImage(null);
   };
 
-  const handlePublish = () => {
+  const handleSuccess = (response) => {
+    toast.success("Post uploaded successfully");
+    setTimeout(() => {
+      navigate("/");
+    }, 2000);
+  };
+
+  const handleError = (error) => {
+    toast.error("Error uploading post");
+  };
+
+  const handlePublish = async () => {
     let hasError = false;
 
     if (!title.trim()) {
@@ -57,9 +74,22 @@ function ComposeBlog() {
     }
 
     if (!hasError) {
-      // Publish the post
-      toast.success("Blog Post Published Successfully");
-      console.log("Publishing post...");
+      try {
+        let imageURL = '';
+        const maxId = await getMaxId();
+
+        if (selectedImage) {
+          const imageRef = ref(storage, `images/${selectedImage.name}`);
+          await uploadBytes(imageRef, selectedImage);
+          imageURL = await getDownloadURL(imageRef);
+        }
+
+        const postContent = value;
+        createBlogPost(maxId + 1, title, currentUserData._id, selectedTags, imageURL, postContent, handleSuccess, handleError);
+      } catch (error) {
+        console.error("Error uploading post: ", error);
+        handleError(error);
+      }
     }
   };
 
@@ -81,7 +111,6 @@ function ComposeBlog() {
     }
 
     if (!hasError) {
-      // Publish the post
       toast.success("Blog Post Saved Successfully");
       console.log("Saving post...");
     }
