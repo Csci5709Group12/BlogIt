@@ -13,4 +13,9 @@
 .blog-feed-item {
     cursor: pointer;
     margin: auto;
+    border: 1px solid #383f51 !important;
+}
+
+.card-body {
+    border: 0px !important;
 }

@@ -24,6 +24,10 @@
     border-radius: 4px;
 }
 
+.video-feed-item {
+    border: 1px solid #383F51 !important;
+}
+
 .video-author-name {
     color: #9E9E9E;
 }

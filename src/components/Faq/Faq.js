@@ -24,7 +24,7 @@ import Header from "../Navbar/Navbar";
  */
 export default function Faq() {
   return (
-    <div>
+    <div> 
       <Header />
       <VerticalNavBar />
       <Container className="faq-container">

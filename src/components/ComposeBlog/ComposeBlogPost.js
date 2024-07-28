@@ -125,7 +125,7 @@ function ComposeBlog() {
               </div>
             )}
             <Form.Control
-              className="title-form"
+              className="blog-title-form"
               style={{ fontWeight: 'bold' }}
               size="lg"
               type="text"

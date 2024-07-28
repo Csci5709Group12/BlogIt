@@ -1,0 +1,28 @@
+.community-page-container {
+    padding-top: 17px;
+    padding-right: 25px;
+    padding-left: 75px;
+    padding-bottom: 25px;
+  }
+  
+  .community-title {
+    color: #383F51;
+    font-size: 2rem;
+  }
+  
+  .community-card {
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .community-card:hover {
+    transform: scale(1.05);
+  }
+  
+  .create-community-button {
+    background-color: #D1BEB0;
+    color: #383F51;
+    border: none;
+    font-size: 1.25rem;
+  }
+  

@@ -1,4 +1,11 @@
-import { Card, Col, Image, Row, OverlayTrigger, Popover } from "react-bootstrap";
+import {
+  Card,
+  Col,
+  Image,
+  Row,
+  OverlayTrigger,
+  Popover,
+} from "react-bootstrap";
 import { useState, useContext, useEffect } from "react";
 import bookmarkWhite from "../../assets/bookmark-white.png";
 import bookmarkBlack from "../../assets/bookmark-black.png";
@@ -14,26 +21,23 @@ function BlogFeedItem({ post }) {
   const [userPopupShow, setUserPopupShow] = useState(false);
   const handleUserNameOnMouseEnter = () => {
     setUserPopupShow(true);
-  }
+  };
   const handleUserNameOnMouseLeave = () => {
     setUserPopupShow(false);
-  }
+  };
 
   useEffect(() => {
-    setBookmarked(bookmarkedPosts.some((item) => item.id === post.id));
+    setBookmarked(bookmarkedPosts.some((item) => item._id === post._id));
   }, [bookmarkedPosts, post.id]);
 
   const handleToggleBookmark = (e) => {
     e.stopPropagation();
     setBookmarked(!bookmarked);
-    if (typeof handleBookmarkToggle === "function") {
-      handleBookmarkToggle(post);
-    }
     handleBookmarkToggle(post);
   };
 
   const handleItemClick = () => {
-    const url = `/blog/${post.id}`;
+    const url = `/blog/${post._id}`;
     navigate(url);
   };
 
@@ -46,52 +50,88 @@ function BlogFeedItem({ post }) {
       >
         <Card.Img
           variant="top"
-          src="https://placehold.co/100x40"
-          style={{ maxHeight: "260px" }}
+          src={post.image_url}
+          style={{ maxHeight: "260px", objectFit: "cover" }}
           className="img-fluid"
         />
         <Card.Body>
           <div>
             <Row>
               <Col md={1}>
-                <Image className='border border-white d-flex' src='https://placehold.co/600x400' style={{ height: '40px', width: '40px', objectFit: 'cover' }} alt="user_picture" roundedCircle />
+                <Image
+                  className="border border-white d-flex"
+                  src="https://placehold.co/600x400"
+                  style={{ height: "40px", width: "40px", objectFit: "cover" }}
+                  alt="user_picture"
+                  roundedCircle
+                />
               </Col>
               <Col>
                 <OverlayTrigger
                   show={userPopupShow}
                   placement="auto-start"
-                  key='bottom'
+                  key="bottom"
                   overlay={
-                    <Popover id='user-popover-bottom' onMouseEnter={handleUserNameOnMouseEnter} onMouseLeave={handleUserNameOnMouseLeave}>
+                    <Popover
+                      id="user-popover-bottom"
+                      onMouseEnter={handleUserNameOnMouseEnter}
+                      onMouseLeave={handleUserNameOnMouseLeave}
+                    >
                       <Popover.Body>
-                        <Row xs='auto'>
+                        <Row xs="auto">
                           <Col>
-                            <Image className='border border-white d-flex' src='https://placehold.co/600x400' style={{ height: '40px', width: '40px', objectFit: 'cover' }} alt="user_picture" roundedCircle />
+                            <Image
+                              className="border border-white d-flex"
+                              src="https://placehold.co/600x400"
+                              style={{
+                                height: "40px",
+                                width: "40px",
+                                objectFit: "cover",
+                              }}
+                              alt="user_picture"
+                              roundedCircle
+                            />
                           </Col>
                           <Col>
                             <Link to="/user/jdoe">
-                              <div className="d-flex" style={{ marginLeft: '-10px', marginTop: '6px' }}><strong>John Doe</strong></div>
+                              <div
+                                className="d-flex"
+                                style={{
+                                  marginLeft: "-10px",
+                                  marginTop: "6px",
+                                }}
+                              >
+                                <strong>John Doe</strong>
+                              </div>
                             </Link>
                           </Col>
                         </Row>
-                        <div className="mt-2">Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...</div>
-                        <div className="mt-2"><strong>Location</strong></div>
+                        <div className="mt-2">
+                          Neque porro quisquam est qui dolorem ipsum quia dolor
+                          sit amet, consectetur, adipisci velit...
+                        </div>
+                        <div className="mt-2">
+                          <strong>Location</strong>
+                        </div>
                         <div>Halifax</div>
-                        <div><strong>Joined</strong></div>
+                        <div>
+                          <strong>Joined</strong>
+                        </div>
                         <div>Jun 19, 2024</div>
                       </Popover.Body>
                     </Popover>
                   }
                 >
-                  <div className="d-flex" onMouseEnter={handleUserNameOnMouseEnter} onMouseLeave={handleUserNameOnMouseLeave}>
-                    <Link to="/user/jdoe">
-                      John Doe
-                    </Link>
+                  <div
+                    className="d-flex"
+                    onMouseEnter={handleUserNameOnMouseEnter}
+                    onMouseLeave={handleUserNameOnMouseLeave}
+                  >
+                    <Link to="/user/jdoe">John Doe</Link>
                   </div>
                 </OverlayTrigger>
                 <div className="text-secondary d-flex">Posted on Jun 19</div>
               </Col>
-
             </Row>
           </div>
           <Card.Title>
