@@ -8,6 +8,8 @@ import infoLogo from '../../assets/info_icon.svg'
 import '../../App.css';
 import '../common.css';
 import brandLogo from '../../img/logo.png';
+import { signUpUser } from '../../services/Authetication';
+import { checkUsernameExists, createUser } from '../../api/User';
 
 YupPassword(yup);
 
@@ -15,6 +17,8 @@ function Signup() {
   const { Formik } = formik;
   const navigate = useNavigate();
   const [signupSuccessShow, signupSuccessSetShow] = useState(false);
+  const [signupFailureShow, signupFailureSetShow] = useState(false);
+  const [failureMessage, setFailureMessage] = useState("Sorry, we failed to created an account!");
   const renderTooltip = (props) => (
     <Tooltip id="info-logo-tooltip" {...props}>
       Password should contain at least 8 characters including 1 lower case character, 1 upper case character, 1 number and 1 special character.
@@ -24,7 +28,7 @@ function Signup() {
   const schema = yup.object().shape(
     {
       name: yup.string().required("Required"),
-      username: yup.string().required("Required").min(6, "Username is too short - should be 6 characters minimum"),
+      username: yup.string().matches(/^[a-zA-Z0-9_-]*$/i, "Special characters are not allowed").required("Required").min(6, "Username is too short - should be 6 characters minimum"),
       email: yup.string().matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i, "Please enter a valid email").required("Required"),
       password: yup.string().required("Required").password()
         .min(8, "Password must contain at least 8 characters")
@@ -36,6 +40,56 @@ function Signup() {
         .oneOf([yup.ref('password')], 'Passwords must match')
     }
   );
+
+  const handleSignUpError = (error) => {
+    console.log(error.code);
+    console.log(error.message);
+
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        setFailureMessage("Email is already in use. Please use a different email.")
+        break;
+      default:
+        break;
+    }
+
+    signupFailureSetShow(true);
+  }
+
+  const handleSignUpSuccess = (userCredentials, values) => {
+    console.log(userCredentials);
+    createUser(userCredentials.user.uid, values.name, values.username, values.email, handleApiSuccess, handleApiFailure);
+  }
+
+  const handleApiSuccess = async (response) => {
+    console.log(response);
+    signupSuccessSetShow(true);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    navigate("/login");
+  }
+
+  const handleApiFailure = (error) => {
+    console.log(error);
+    signupFailureSetShow(true);
+  }
+
+  const handleCheckUsernameSuccess = (response, values) => {
+    console.log(response);
+    if (response.data && response.data.exists && response.data.exists === true) {
+      setFailureMessage("Username is already taken! Please use another username.")
+      signupFailureSetShow(true);
+    } else {
+      if (values) {
+        // Sign up the user with Firebase Auth if the username does not exist
+        signUpUser(values.email, values.password, values, handleSignUpSuccess, handleSignUpError);
+      }
+    }
+  }
+
+  const handleCheckUsernameError = (error) => {
+    console.log(error);
+    signupFailureSetShow(true);
+  }
 
   return (
     <div className='App'>
@@ -54,10 +108,8 @@ function Signup() {
                   validationSchema={schema}
                   onSubmit={
                     async values => {
-                      await new Promise(resolve => setTimeout(resolve, 500));
-                      signupSuccessSetShow(true);
-                      await new Promise(resolve => setTimeout(resolve, 1000));
-                      navigate("/login");
+                      // Check if the username is already taken before signing up the user
+                      checkUsernameExists(values.username, values, handleCheckUsernameSuccess, handleCheckUsernameError);
                     }
                   }
                   initialValues={{
@@ -191,6 +243,9 @@ function Signup() {
                 <div className="pt-2">
                   <Alert key="success" variant="success" show={signupSuccessShow}>
                     You have successfully created an account!
+                  </Alert>
+                  <Alert key="error" variant="danger" show={signupFailureShow}>
+                    {failureMessage}
                   </Alert>
                 </div>
               </div>

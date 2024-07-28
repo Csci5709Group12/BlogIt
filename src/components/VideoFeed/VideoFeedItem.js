@@ -6,7 +6,7 @@ function VideoFeedItem({ video }) {
   const navigate = useNavigate();
 
   const handleItemClick = () => {
-    const url = `/videos/${video.id}`;
+    const url = `/videos/${video._id}`;
     navigate(url);
   };
 
@@ -16,10 +16,10 @@ function VideoFeedItem({ video }) {
         <div className="position-relative">
           <Card.Img
             variant="top"
-            src={video.thumbnailUrl}
+            src={video.thumbnail_url}
             className="img-fluid"
           />
-          <div className="video-time">{video.videoTime}</div>
+          <div className="video-time">{video.time}</div>
         </div>
         <Card.Body>
           <Card.Title><b>{video.title}</b></Card.Title>

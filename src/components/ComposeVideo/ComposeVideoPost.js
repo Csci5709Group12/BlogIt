@@ -6,11 +6,14 @@ import ReactQuill from 'react-quill';
 import { Autocomplete, TextField, Chip } from '@mui/material';
 import { ToastContainer, toast } from "react-toastify";
 import CreatePostNavbar from '../Navbar/CreatePostNavbar';
-
+import { storage } from "../../firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { createVideoPost, getMaxId } from '../../api/Video';
 import 'react-quill/dist/quill.snow.css';
 import "react-toastify/dist/ReactToastify.css";
 import './ComposeVideoPost.css';
 import '../common.css';
+import { useNavigate } from 'react-router-dom';
 
 function ComposeVideo() {
   const [value, setValue] = useState("");
@@ -19,14 +22,40 @@ function ComposeVideo() {
   const [titleError, setTitleError] = useState("");
   const [contentError, setContentError] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
+  const [videoDuration, setVideoDuration] = useState("");
+  const [thumbnailBlob, setThumbnailBlob] = useState(null);
+
+  const navigate = useNavigate();
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      setSelectedVideo(reader.result);
+    setSelectedVideo(file);
+
+    // Load video metadata to get duration
+    const videoElement = document.createElement('video');
+    videoElement.preload = 'metadata';
+    videoElement.onloadedmetadata = function () {
+      window.URL.revokeObjectURL(videoElement.src);
+      const duration = videoElement.duration;
+      const minutes = Math.floor(duration / 60);
+      const seconds = Math.floor(duration % 60);
+      const formattedDuration = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+      setVideoDuration(formattedDuration);
+
+      // Generate thumbnail
+      videoElement.currentTime = Math.floor(duration / 2);
     };
-    reader.readAsDataURL(file);
+    videoElement.onseeked = function () {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        setThumbnailBlob(blob);
+      }, 'image/jpeg');
+    };
+    videoElement.src = URL.createObjectURL(file);
   };
 
   const tags = ["web", "java", "react", "android", "programming"];
@@ -35,7 +64,18 @@ function ComposeVideo() {
     setSelectedVideo(null);
   };
 
-  const handlePublish = () => {
+  const handleSuccess = (response) => {
+    toast.success("Post uploaded successfully");
+    setTimeout(() => {
+      navigate("/");
+    }, 2000);
+  };
+
+  const handleError = (error) => {
+    toast.error("Error uploading post");
+  };
+
+  const handlePublish = async () => {
     let hasError = false;
 
     if (!title.trim()) {
@@ -53,9 +93,39 @@ function ComposeVideo() {
     }
 
     if (!hasError) {
-      // Publish the post
-      toast.success("Video Post Published Successfully");
-      console.log("Publishing post...");
+      try {
+        let videoURL = '';
+        let thumbnailURL = '';
+        let maxId = 0;
+
+        await getMaxId(
+          (id) => {
+            maxId = id;
+          },
+          (error) => {
+            console.error("Error fetching max ID: ", error);
+          }
+        );
+
+        if (selectedVideo) {
+          const videoRef = ref(storage, `videos/${selectedVideo.name}`);
+          await uploadBytes(videoRef, selectedVideo);
+          videoURL = await getDownloadURL(videoRef);
+
+          if (thumbnailBlob) {
+            const thumbnailRef = ref(storage, `thumbnails/${selectedVideo.name}.jpg`);
+            await uploadBytes(thumbnailRef, thumbnailBlob);
+            thumbnailURL = await getDownloadURL(thumbnailRef);
+          }
+        }
+
+        const postContent = value;
+
+        createVideoPost(maxId + 1, videoURL, title, "author", selectedTags, videoDuration, thumbnailURL, postContent, handleSuccess, handleError);
+      } catch (error) {
+        console.error("Error uploading post: ", error);
+        handleError(error);
+      }
     }
   };
 
@@ -77,9 +147,9 @@ function ComposeVideo() {
     }
 
     if (!hasError) {
-      // Publish the post
+      // Save the draft
       toast.success("Video Post Saved Successfully");
-      console.log("Publishing post...");
+      console.log("Saving draft...");
     }
   };
 
@@ -113,7 +183,7 @@ function ComposeVideo() {
             </Button>
             {selectedVideo && (
               <div className="video-container">
-                <video src={selectedVideo} controls className="thumbnail" />
+                <video src={URL.createObjectURL(selectedVideo)} controls className="thumbnail" />
                 <div>
                   <Button variant="danger" style={{ margin: "10px" }} onClick={removeVideo}>Remove</Button>
                   <Button variant="secondary" onClick={() => document.getElementById('fileInput').click()}>Change</Button>

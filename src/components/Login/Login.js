@@ -1,4 +1,5 @@
-import { Button, Col, Container, Form, InputGroup, Image } from 'react-bootstrap';
+import { useContext, useState } from 'react';
+import { Alert, Button, Col, Container, Form, InputGroup, Image } from 'react-bootstrap';
 import { Link } from "react-router-dom";
 import * as formik from 'formik';
 import * as yup from 'yup';
@@ -6,10 +7,16 @@ import { useNavigate } from "react-router-dom";
 import '../../App.css';
 import '../common.css';
 import brandLogo from '../../img/logo.png';
+import { signInUser } from '../../services/Authetication';
+import { CurrentUserContext } from '../../App';
 
 function Login() {
   const { Formik } = formik;
   const navigate = useNavigate();
+  const [loginSuccessShow, loginSuccessSetShow] = useState(false);
+  const [loginFailureShow, loginFailureSetShow] = useState(false);
+  const [failureMessage, setFailureMessage] = useState("Sorry, we failed to log you in!");
+  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
 
   const schema = yup.object().shape(
     {
@@ -17,6 +24,27 @@ function Login() {
       password: yup.string().required("Required")
     }
   );
+
+  const handleLoginSuccess = async (userCredentials) => {
+    console.log(userCredentials);
+    setCurrentUser(userCredentials.user);
+    loginSuccessSetShow(true);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    navigate("/");
+  }
+
+  const handleLoginFailure = (error) => {
+    console.log(error.code);
+    console.log(error.message);
+    switch (error.code) {
+      case 'auth/invalid-credential':
+        setFailureMessage("Invalid email and/or password.");
+        break;
+      default:
+        break;
+    }
+    loginFailureSetShow(true);
+  }
 
   return (
     <div className='App'>
@@ -35,12 +63,13 @@ function Login() {
                   validationSchema={schema}
                   onSubmit={
                     async values => {
-                      navigate("/");
+                      signInUser(values.email, values.password, values.rememberMe, handleLoginSuccess, handleLoginFailure);
                     }
                   }
                   initialValues={{
                     email: '',
                     password: '',
+                    rememberMe: false,
                   }}
                 >
                   {({ values,
@@ -99,6 +128,7 @@ function Login() {
                               label="Remember Me"
                               onChange={handleChange}
                               id="validationFormik106"
+                              checked={values.rememberMe}
                             />
                           </Form.Group>
                         </Col>
@@ -116,6 +146,16 @@ function Login() {
                   )}
 
                 </Formik>
+
+                <div className="pt-2">
+                  <Alert key="success" variant="success" show={loginSuccessShow}>
+                    You have successfully logged in!
+                  </Alert>
+                  <Alert key="error" variant="danger" show={loginFailureShow}>
+                    {failureMessage}
+                  </Alert>
+                </div>
+
               </div>
             </div>
           </div>

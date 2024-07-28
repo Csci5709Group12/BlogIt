@@ -75,8 +75,8 @@ function VerticalNavBar() {
         <Link to="/tags" className="nav-link custom-text">
           Tags
         </Link>
-        <Link to="" className="nav-link custom-text">
-          Communities
+        <Link to="/community" className="nav-link custom-text">
+          Community
         </Link>
       </div>
     </>

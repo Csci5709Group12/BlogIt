@@ -1,41 +1,33 @@
-import { Alert, Button, Container, Form, InputGroup, Image, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Alert, Button, Container, Form, InputGroup, Image } from 'react-bootstrap';
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import * as formik from 'formik';
 import * as yup from 'yup';
 import YupPassword from 'yup-password';
-import { useNavigate } from "react-router-dom";
 import '../../App.css';
 import '../common.css';
 import brandLogo from '../../img/logo.png';
-import infoLogo from '../../assets/info_icon.svg'
+import { resetUserPassword } from '../../services/Authetication';
 
 YupPassword(yup);
 
 function ForgotPassword() {
   const { Formik } = formik;
-  const navigate = useNavigate();
   const [resetSuccessShow, resetSuccessSetShow] = useState(false);
-
-  const renderTooltip = (props) => (
-    <Tooltip id="info-logo-tooltip" {...props}>
-      Password should contain at least 8 characters including 1 lower case character, 1 upper case character, 1 number and 1 special character.
-    </Tooltip>
-  );
-
   const schema = yup.object().shape(
     {
       email: yup.string().matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i, "Please enter a valid email").required("Required"),
-      password: yup.string().required("Required").password()
-      .min(8, "Password must contain at least 8 characters")
-      .minLowercase(1, "Password must contain at least one lower case character")
-      .minUppercase(1, "Password must contain at least one upper case character")
-      .minNumbers(1, "Password must contain at least one number")
-      .minSymbols(1, "Password must contain at least one special character"),
-      passwordConfirmation: yup.string().required("Required")
-      .oneOf([yup.ref('password')], 'Passwords must match'),
     }
   );
+
+  const handleResetEmailSuccess = () => {
+    resetSuccessSetShow(true);
+  }
+
+  const handleResetEmailError = (error) => {
+    console.log(error.code);
+    console.log(error.message);
+  }
 
   return (
     <div className='App'>
@@ -54,15 +46,11 @@ function ForgotPassword() {
                   validationSchema={schema}
                   onSubmit={
                     async values => {
-                      resetSuccessSetShow(true);
-                      await new Promise(resolve => setTimeout(resolve, 1000));
-                      navigate("/login");
+                      resetUserPassword(values.email, handleResetEmailSuccess, handleResetEmailError);
                     }
                   }
                   initialValues={{
                     email: '',
-                    password: '',
-                    passwordConfirmation: '',
                   }}
                 >
                   {({ values,
@@ -92,57 +80,10 @@ function ForgotPassword() {
                           </Form.Control.Feedback>
                         </InputGroup>
                       </Form.Group>
-                      
-                      <Form.Group className="mb-3" controlId="validationFormik04">
-                        <Form.Label class="d-flex">
-                          Password
-                          <OverlayTrigger
-                            placement="right"
-                            delay={{ show: 250, hide: 400 }}
-                            overlay={renderTooltip}
-                          >
-                            <img src={infoLogo} alt="Info Logo" className="ms-1" />
-                          </OverlayTrigger>
-                        </Form.Label>
-                        <InputGroup hasValidation>
-                          <Form.Control
-                            type="password"
-                            name="password"
-                            value={values.password}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            isValid={touched.password && !errors.password}
-                            isInvalid={!!errors.password}
-                            placeholder="Enter password"
-                          />
-                          <Form.Control.Feedback className="d-flex" type="invalid">
-                            {errors.password}
-                          </Form.Control.Feedback>
-                        </InputGroup>
-                      </Form.Group>
-                      
-                      <Form.Group className="mb-3" controlId="validationFormik05">
-                        <Form.Label className="d-flex">Password Confirmation</Form.Label>
-                        <InputGroup hasValidation>
-                          <Form.Control
-                            type="password"
-                            name="passwordConfirmation"
-                            value={values.passwordConfirmation}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            isValid={touched.passwordConfirmation && !errors.passwordConfirmation}
-                            isInvalid={!!errors.passwordConfirmation}
-                            placeholder="Enter password again"
-                          />
-                          <Form.Control.Feedback className="d-flex" type="invalid">
-                            {errors.passwordConfirmation}
-                          </Form.Control.Feedback>
-                        </InputGroup>
-                      </Form.Group>
 
                       <div className="d-grid gap-2">
                         <Button variant="primary" type='submit' size="lg">
-                          Reset Password
+                          Send Reset Password Email
                         </Button>
                       </div>
                     </Form>
@@ -151,7 +92,7 @@ function ForgotPassword() {
                 </Formik>
                 <div className="pt-2">
                   <Alert key="success" variant="success" show={resetSuccessShow}>
-                    You have successfully reset your password!
+                    If you have an account with us, the reset password link has been sent to your email address. 
                   </Alert>
                 </div>
               </div>

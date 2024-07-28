@@ -1,19 +1,48 @@
+import { useContext } from 'react';
 import { Card, Form, InputGroup, Button, ListGroup, Modal, Alert } from "react-bootstrap";
 import * as formik from 'formik';
 import * as yup from 'yup';
 import YupPassword from 'yup-password';
 import { useState } from "react";
+import { deleteUserAccount, reauthenticateUser, updateUserPassword } from "../../services/Authetication";
+import { useNavigate } from "react-router-dom";
+import { CurrentUserDataContext } from '../../App';
 
 YupPassword(yup);
 
 function DeleteAccountModal(props) {
   const { Formik } = formik;
+  const [deleteSuccessShow, deleteSuccessSetShow] = useState(false);
+  const [deleteFailureShow, deleteFailureSetShow] = useState(false);
+  const [failureMessage, setFailureMessage] = useState("Sorry, we failed to delete your account!");
   const schema = yup.object().shape(
     {
       email: yup.string().email().required("Required"),
       password: yup.string().required("Required")
     }
   );
+  const navigate = useNavigate();
+
+  const handleDeleteSuccess = async () => {
+    deleteSuccessSetShow(true);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    navigate("/");
+  };
+
+  const handleDeleteError = (error) => {
+    console.log(error);
+    deleteFailureSetShow(true);
+  };
+
+  const handleReauthSuccess = () => {
+    deleteUserAccount(handleDeleteSuccess, handleDeleteError);
+  };
+
+  const handleReauthFailure = (error) => {
+    console.log(error);
+    setFailureMessage("Email and/or password is incorrect.")
+    deleteFailureSetShow(true);
+  };
 
   return (
     <Modal
@@ -40,8 +69,7 @@ function DeleteAccountModal(props) {
             validationSchema={schema}
             onSubmit={
               async values => {
-                await new Promise(resolve => setTimeout(resolve, 500));
-                alert(JSON.stringify(values, null, 2));
+                reauthenticateUser(values.email, values.password, handleReauthSuccess, handleReauthFailure);
               }
             }
             initialValues={{
@@ -104,6 +132,14 @@ function DeleteAccountModal(props) {
             )}
 
           </Formik>
+          <div className='mt-2'>
+            <Alert key="success" variant="success" show={deleteSuccessShow}>
+              You have successfully created an account!
+            </Alert>
+            <Alert key="error" variant="danger" show={deleteFailureShow}>
+              {failureMessage}
+            </Alert>
+          </div>
         </div>
       </Modal.Body>
       <Modal.Footer>
@@ -117,7 +153,8 @@ function AccountSettings() {
   const { Formik } = formik;
   const schema = yup.object().shape(
     {
-      password: yup.string(),
+      email: yup.string().required("Please enter your email"),
+      password: yup.string().required("Please enter your password"),
       newPassword: yup.string().password()
         .min(8, "Password must contain at least 8 characters")
         .minLowercase(1, "Password must contain at least one lower case character")
@@ -129,6 +166,18 @@ function AccountSettings() {
     }
   );
   const [deleteAccountModalShow, setDeleteAccountModalShow] = useState(false);
+  const { currentUserData, setCurrentUserData } = useContext(CurrentUserDataContext);
+  const [updatePasswdSuccessShow, updatePasswdSuccessSetShow] = useState(false);
+  const [updatePasswdFailureShow, updatePasswdFailureSetShow] = useState(false);
+
+  const handleUpdatePasswordSuccess = async () => {
+    updatePasswdSuccessSetShow(true);
+  }
+
+  const handleUpdatePasswordFailure = (error) => {
+    console.log(error);
+    updatePasswdFailureSetShow(true);
+  }
 
   return (
     <div className="App">
@@ -139,10 +188,19 @@ function AccountSettings() {
             validationSchema={schema}
             onSubmit={
               async values => {
-                await new Promise(resolve => setTimeout(resolve, 500));
+                updatePasswdFailureSetShow(false);
+                updatePasswdSuccessSetShow(false);
+                updateUserPassword(
+                  values.email,
+                  values.password,
+                  values.newPassword,
+                  handleUpdatePasswordSuccess,
+                  handleUpdatePasswordFailure
+                );
               }
             }
             initialValues={{
+              email: currentUserData.email,
               password: '',
               newPassword: '',
               confirmNewPassword: '',
@@ -158,6 +216,25 @@ function AccountSettings() {
               handleSubmit,
               handleReset }) => (
               <Form noValidate onSubmit={handleSubmit} class="d-flex">
+
+                <Form.Group className="mb-3" controlId="validationFormik03">
+                  <Form.Label class="d-flex">Email address</Form.Label>
+                  <InputGroup hasValidation>
+                    <Form.Control
+                      type="email"
+                      name="email"
+                      value={values.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="Enter email"
+                      disabled={true}
+                    />
+                    <Form.Control.Feedback className="d-flex" type="invalid">
+                      {errors.email}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+
                 <Form.Group className="mb-3" controlId="validationFormik04">
                   <Form.Label class="d-flex">Password</Form.Label>
                   <InputGroup hasValidation>
@@ -175,6 +252,7 @@ function AccountSettings() {
                     </Form.Control.Feedback>
                   </InputGroup>
                 </Form.Group>
+
                 <Form.Group className="mb-3" controlId="validationFormik04">
                   <Form.Label class="d-flex">New password</Form.Label>
                   <InputGroup hasValidation>
@@ -224,6 +302,14 @@ function AccountSettings() {
               </Form>
             )}
           </Formik>
+          <div className='mt-2'>
+            <Alert key="success" variant="success" show={updatePasswdSuccessShow}>
+              Your password has been updated!
+            </Alert>
+            <Alert key="error" variant="danger" show={updatePasswdFailureShow}>
+              Failed to update your password.
+            </Alert>
+          </div>
         </Card.Body>
       </Card>
       <div className="mt-3">
@@ -237,9 +323,9 @@ function AccountSettings() {
                 Deleting your account will:
               </div>
               <ListGroup variant="flush">
-                <ListGroup.Item variant="danger">Delete your profile.</ListGroup.Item>
-                <ListGroup.Item variant="danger">Delete any and all content you have, such as articles, comments, or your reading list.</ListGroup.Item>
-                <ListGroup.Item variant="danger">Allow your username to become available to anyone.</ListGroup.Item>
+                <ListGroup.Item variant="danger">Not delete your profile to maintain consistency on BlogIt.</ListGroup.Item>
+                <ListGroup.Item variant="danger">Not delete all the content you have created, such as articles, comments, and other content, to preserve author attribution.</ListGroup.Item>
+                <ListGroup.Item variant="danger">Remove your personalized access to BlogIt.</ListGroup.Item>
               </ListGroup>
             </Card.Text>
             <Button variant="warning" onClick={() => setDeleteAccountModalShow(true)}>Delete your account</Button>

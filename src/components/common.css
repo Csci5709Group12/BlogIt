@@ -43,3 +43,7 @@
   background-color: #3C4F76 !important;
   color: #DDDBF1 !important;
 }
+
+.dropdown-item:active {
+    background-color: #DDDBF1 !important;
+}
