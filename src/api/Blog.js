@@ -28,7 +28,7 @@ export const createBlogPost = (blog_id, title, author, tags, image_url, content,
         author,
         tags,
         image_url,
-        content
+        content,
     };
   
     axios.post(`${SERVER_HOST}/blogs/create`, video)
@@ -40,19 +40,21 @@ export const createBlogPost = (blog_id, title, author, tags, image_url, content,
         });
 }
 
-export const getMaxId = (apiSuccessCb, apiFailureCb) => {
-    axios.get(`${SERVER_HOST}/blogs/get/all`)
+export const getMaxId = () => {
+    return new Promise((resolve, reject) => {
+      axios.get(`${SERVER_HOST}/blogs/get/all`)
         .then((response) => {
-            if (response.data && response.data.blogs) {
-                const maxId = response.data.blogs.reduce((max, blog) => {
-                    return blog._id > max ? blog._id : max;
-                }, response.data.blogs[0]._id);
-                apiSuccessCb(maxId);
-            } else {
-                apiFailureCb("No blogs found");
-            }
+          if (response.data && Array.isArray(response.data.blogs) && response.data.blogs.length > 0) {
+            const maxId = response.data.blogs.reduce((max, blog) => {
+              return blog._id > max ? blog._id : max;
+            }, response.data.blogs[0]._id);
+            resolve(maxId);
+          } else {
+            reject("No blogs found");
+          }
         })
         .catch((error) => {
-            apiFailureCb(error.message);
+          reject(error.message);
         });
+    });
 };

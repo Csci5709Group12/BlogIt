@@ -13,9 +13,9 @@ import { BookmarkContext } from "../../context/BookmarkContext";
 import { Link, useNavigate } from "react-router-dom";
 
 import "./BlogFeedItem.css";
+import { LinkContainer } from "react-router-bootstrap";
 
 function BlogFeedItem({ post }) {
-  const navigate = useNavigate();
   const { bookmarkedPosts, handleBookmarkToggle } = useContext(BookmarkContext);
   const [bookmarked, setBookmarked] = useState(false);
   const [userPopupShow, setUserPopupShow] = useState(false);
@@ -26,9 +26,12 @@ function BlogFeedItem({ post }) {
     setUserPopupShow(false);
   };
 
+  const normalizeId = (post) => post._id || post.blog_post_id;
   useEffect(() => {
-    setBookmarked(bookmarkedPosts.some((item) => item._id === post._id));
-  }, [bookmarkedPosts, post.id]);
+    setBookmarked(
+      bookmarkedPosts.some((item) => normalizeId(item) === normalizeId(post))
+    );
+  }, [bookmarkedPosts, post]);
 
   const handleToggleBookmark = (e) => {
     e.stopPropagation();
@@ -36,24 +39,27 @@ function BlogFeedItem({ post }) {
     handleBookmarkToggle(post);
   };
 
-  const handleItemClick = () => {
-    const url = `/blog/${post._id}`;
-    navigate(url);
-  };
+  const formatBlogTimestamp = (ts) => {
+    const d = new Date(ts * 1000);
+    const now = new Date()
+    const month = d.toLocaleString('default', { month: "long" });
+    return month + " " + d.getDate() + ((now.getFullYear() === d.getFullYear()) ? "" : ", " + d.getFullYear());
+  }
 
   return (
     <div className="blog-feed-item-container">
       <Card
         className="blog-feed-item"
         style={{ width: "40rem" }}
-        onClick={handleItemClick}
       >
-        <Card.Img
-          variant="top"
-          src={post.image_url}
-          style={{ maxHeight: "260px", objectFit: "cover" }}
-          className="img-fluid"
-        />
+        <LinkContainer to={"/blog/" + post._id}>
+          <Card.Img
+            variant="top"
+            src={post.image_url}
+            style={{ maxHeight: "260px", objectFit: "cover" }}
+            className="img-fluid"
+          />
+        </LinkContainer>
         <Card.Body>
           <div>
             <Row>
@@ -130,17 +136,23 @@ function BlogFeedItem({ post }) {
                     <Link to="/user/jdoe">John Doe</Link>
                   </div>
                 </OverlayTrigger>
-                <div className="text-secondary d-flex">Posted on Jun 19</div>
+                <div className="text-secondary d-flex">Posted on {formatBlogTimestamp(post.timestamp)}</div>
               </Col>
             </Row>
           </div>
-          <Card.Title>
-            <b>{post.title}</b>
-          </Card.Title>
-          <Card.Text className="blog-feed-item-tags">
-            <i>{post.tags}</i>
-          </Card.Text>
-          <Card.Text>{post.summary}</Card.Text>
+          <LinkContainer to={"/blog/" + post._id}>
+            <Card.Title>
+              <b>{post.title}</b>
+            </Card.Title>
+          </LinkContainer>
+          <LinkContainer to={"/blog/" + post._id}>
+            <Card.Text className="blog-feed-item-tags">
+              <i>{post.tags}</i>
+            </Card.Text>
+          </LinkContainer>
+          <LinkContainer to={"/blog/" + post._id}>
+            <Card.Text>{post.summary}</Card.Text>
+          </LinkContainer>
           <div onClick={handleToggleBookmark} style={{ cursor: "pointer" }}>
             <img
               src={bookmarked ? bookmarkBlack : bookmarkWhite}

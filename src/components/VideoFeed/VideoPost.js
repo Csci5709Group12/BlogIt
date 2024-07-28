@@ -1,6 +1,13 @@
 
-import { useParams } from "react-router-dom";
-import { Card } from 'react-bootstrap';
+import { Link, useParams } from "react-router-dom";
+import {
+  Card,
+  Col,
+  Image,
+  Row,
+  OverlayTrigger,
+  Popover,
+} from "react-bootstrap";
 import { storage } from "../../firebase";
 import { ref, getDownloadURL } from "firebase/storage";
 import { useEffect, useState } from "react";
@@ -10,14 +17,37 @@ import AppNavbar from "../Navbar/Navbar";
 
 import "./VideoPost.css";
 import "./VideoFeed.css";
+import { getUserData } from "../../api/User";
+import avatar from '../../img/profile_placeholder.png';
 
 function VideoPost() {
   const { id } = useParams();
 
   const [videoUrl, setVideoUrl] = useState("");
   const [videoContent, setVideoContent] = useState({});
+  const [userPopupShow, setUserPopupShow] = useState(false);
+  const [authorData, setAuthorData] = useState({});
+
+  const handleUserNameOnMouseEnter = () => {
+    setUserPopupShow(true);
+  };
+  const handleUserNameOnMouseLeave = () => {
+    setUserPopupShow(false);
+  };
 
   useEffect(() => {
+    const getAuthorDataSuccess = (response) => {
+      setAuthorData(response.data);
+    }
+
+    const getAuthorDataError = (error) => {
+      console.error(error);
+    }
+
+    const getAuthorData = (id) => {
+      getUserData(id, getAuthorDataSuccess, getAuthorDataError);
+    }
+
     const fetchVideoUrl = async (videoPath) => {
       try {
         const url = await getDownloadURL(ref(storage, videoPath));
@@ -29,10 +59,11 @@ function VideoPost() {
     };
 
     const handleSuccess = (response) => {
-      console.log(response);
+      console.log(response.data);
       setVideoContent(response.data);
 
       if (response.data && response.data.video_url) {
+        getAuthorData(response.data.author);
         fetchVideoUrl(response.data.video_url);
       }
     };
@@ -44,9 +75,18 @@ function VideoPost() {
     getVideoById(id, handleSuccess, handleError);
   }, [id]);
 
+  const formatBlogTimestamp = (ts) => {
+    const d = new Date(ts * 1000);
+    const now = new Date()
+    const month = d.toLocaleString('default', { month: "long" });
+    return month + " " + d.getDate() + ((now.getFullYear() === d.getFullYear()) ? "" : ", " + d.getFullYear());
+  }
+
   if (!videoContent) {
     return <div>Video post not found</div>;
   }
+
+  console.log(videoContent)
 
   return (
     <div>
@@ -64,6 +104,91 @@ function VideoPost() {
             ) : (
               <div>Loading video...</div>
             )}
+            <div>
+              <Row>
+                <Col md={1}>
+                  <Image
+                    className="border border-white d-flex"
+                    src={ (authorData.profile_pic) ? authorData.profile_pic : avatar}
+                    style={{ height: "40px", width: "40px", objectFit: "cover" }}
+                    alt="user_picture"
+                    roundedCircle
+                  />
+                </Col>
+                <Col>
+                  <OverlayTrigger
+                    show={userPopupShow}
+                    placement="auto-start"
+                    key="bottom"
+                    overlay={
+                      <Popover
+                        id="user-popover-bottom"
+                        onMouseEnter={handleUserNameOnMouseEnter}
+                        onMouseLeave={handleUserNameOnMouseLeave}
+                      >
+                        <Popover.Body>
+                          <Row xs="auto">
+                            <Col>
+                              <Image
+                                className="border border-white d-flex"
+                                src={ (authorData.profile_pic) ? authorData.profile_pic : avatar}
+                                style={{
+                                  height: "40px",
+                                  width: "40px",
+                                  objectFit: "cover",
+                                }}
+                                alt="user_picture"
+                                roundedCircle
+                              />
+                            </Col>
+                            <Col>
+                              <Link to={"/user/" + authorData.username}>
+                                <div
+                                  className="d-flex"
+                                  style={{
+                                    marginLeft: "-10px",
+                                    marginTop: "6px",
+                                  }}
+                                >
+                                  <strong>{authorData.name}</strong>
+                                </div>
+                              </Link>
+                            </Col>
+                          </Row>
+                          <div className="mt-2">
+                            {authorData.bio}
+                          </div>
+                          { (authorData && authorData.location) ? (
+                            <>
+                              <div className="mt-2">
+                            <strong>Location</strong>
+                          </div>
+                          <div>{authorData.location}</div>
+                            </>
+                          ) : (
+                            <></>
+                          ) }
+                          
+                          <div>
+                            <strong>Joined</strong>
+                          </div>
+                          <div>{authorData.join_date}</div>
+                        </Popover.Body>
+                      </Popover>
+                    }
+                  >
+                    <div
+                      className="d-flex"
+                      onMouseEnter={handleUserNameOnMouseEnter}
+                      onMouseLeave={handleUserNameOnMouseLeave}
+                    >
+                      <Link to={"/user/" + authorData.username}>{authorData.name}</Link>
+                    </div>
+                  </OverlayTrigger>
+                  <div className="text-secondary d-flex">Posted on {formatBlogTimestamp(videoContent.timestamp)}</div>
+                </Col>
+              </Row>
+            </div>
             <Card.Text dangerouslySetInnerHTML={{ __html: videoContent.content }} />
           </Card.Body>
         </Card>
