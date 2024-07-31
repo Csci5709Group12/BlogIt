@@ -109,7 +109,7 @@ function UserProfileDisplay({ userData }) {
               )}
             </Row>
             {
-              (userData && currentUserData && currentUserData._id === userData.id) ? (
+              (userData && currentUserData && currentUserData.id === userData.id) ? (
                 <>
                   <hr />
                 </>
@@ -120,7 +120,7 @@ function UserProfileDisplay({ userData }) {
           </div>
           <div className="d-flex justify-content-center">
             {
-              (userData && currentUserData && currentUserData._id === userData.id) ? (
+              (userData && currentUserData && currentUserData.id === userData.id) ? (
                 <Link to="/settings">
                   <Button>Edit Profile</Button>
                 </Link>
