@@ -21,7 +21,7 @@ export const getVideoById = async(id, apiSuccessCb, apiFailureCb) => {
         })
 }
 
-export const createVideoPost = (video_id, video_url, title, author, tags, time, thumbnail_url, content, apiSuccessCb, apiFailureCb) => {
+export const createVideoPost = (video_id, video_url, title, author, tags, time, thumbnail_url, content, community_id, apiSuccessCb, apiFailureCb) => {
     const video = {
         video_post_id: video_id,
         video_url,
@@ -30,11 +30,13 @@ export const createVideoPost = (video_id, video_url, title, author, tags, time, 
         tags,
         time,
         thumbnail_url,
-        content
+        content,
+        community_id
     };
   
     axios.post(`${SERVER_HOST}/videos/create`, video)
         .then((response) => {
+            console.log(video);
             apiSuccessCb(response);
         })
         .catch((error) => {
@@ -57,4 +59,14 @@ export const getMaxId = (apiSuccessCb, apiFailureCb) => {
         .catch((error) => {
             apiFailureCb(error.message);
         });
+};
+
+export const getAllVideosByUserId = async(userId, apiSuccessCb, apiFailureCb) => {
+    axios.get(`${SERVER_HOST}/videos/get/users/${userId}`)
+        .then((response) => {
+            apiSuccessCb(response);
+        })
+        .catch((error) => {
+            apiFailureCb(error);
+        })
 };

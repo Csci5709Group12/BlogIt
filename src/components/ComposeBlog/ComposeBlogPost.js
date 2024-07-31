@@ -14,23 +14,27 @@ import "react-toastify/dist/ReactToastify.css";
 import './ComposeBlogPost.css';
 import '../common.css';
 import { createBlogPost, getMaxId } from '../../api/Blog';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function ComposeBlog() {
   const [value, setValue] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState(null);
   const [title, setTitle] = useState("");
   const [titleError, setTitleError] = useState("");
   const [contentError, setContentError] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
-  const { currentUserData, setCurrentUserData } = useContext(CurrentUserDataContext);
+  const { currentUserData } = useContext(CurrentUserDataContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const communityId = new URLSearchParams(location.search).get('community_id');
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
+    setSelectedImageFile(file);
     const reader = new FileReader();
     reader.onload = () => {
-      setSelectedImage(reader.result);
+      setSelectedImagePreview(reader.result);
     };
     reader.readAsDataURL(file);
   };
@@ -39,20 +43,22 @@ function ComposeBlog() {
     document.title = "Compose Blog Post";
   }, []);
 
+  // TODO: Get tags from Mongo
   const tags = ["web", "java", "react", "android", "programming"];
 
   const removeImage = () => {
-    setSelectedImage(null);
+    setSelectedImageFile(null);
+    setSelectedImagePreview(null);
   };
 
-  const handleSuccess = (response) => {
+  const handleSuccess = () => {
     toast.success("Post uploaded successfully");
     setTimeout(() => {
       navigate("/");
     }, 2000);
   };
 
-  const handleError = (error) => {
+  const handleError = () => {
     toast.error("Error uploading post");
   };
 
@@ -78,14 +84,15 @@ function ComposeBlog() {
         let imageURL = '';
         const maxId = await getMaxId();
 
-        if (selectedImage) {
-          const imageRef = ref(storage, `images/${selectedImage.name}`);
-          await uploadBytes(imageRef, selectedImage);
+        if (selectedImageFile) {
+          const imageRef = ref(storage, `images/blogs/${selectedImageFile.name}`);
+          await uploadBytes(imageRef, selectedImageFile);
           imageURL = await getDownloadURL(imageRef);
         }
 
         const postContent = value;
-        createBlogPost(maxId + 1, title, currentUserData._id, selectedTags, imageURL, postContent, handleSuccess, handleError);
+        // TODO: Need to add community ID
+        createBlogPost(maxId + 1, title, currentUserData._id, selectedTags, imageURL, postContent, communityId, handleSuccess, handleError);
       } catch (error) {
         console.error("Error uploading post: ", error);
         handleError(error);
@@ -144,9 +151,9 @@ function ComposeBlog() {
             >
               Add a cover image
             </Button>
-            {selectedImage && (
+            {selectedImageFile && (
               <div className="image-container">
-                <img src={selectedImage} alt="Selected" className="thumbnail" />
+                <img src={selectedImagePreview} alt="Selected" className="thumbnail" />
                 <div>
                   <Button variant="danger" style={{ margin: "10px" }} onClick={removeImage}>Remove</Button>
                   <Button variant="secondary" onClick={() => document.getElementById('fileInput').click()}>Change</Button>

@@ -76,10 +76,25 @@ function VideoPost() {
   }, [id]);
 
   const formatBlogTimestamp = (ts) => {
+    // Create a Date object from the ISO 8601 string
+    const d = new Date(ts);
+    const now = new Date();
+    
+    // Get the month name and date
+    const month = d.toLocaleString('default', { month: 'long' });
+    const date = d.getDate();
+    
+    // Determine if the year should be included
+    const year = now.getFullYear() === d.getFullYear() ? '' : `, ${d.getFullYear()}`;
+    
+    // Return the formatted string
+    return `${month} ${date}${year}`;
+  };
+
+  const formatUserJoinTimestamp = (ts) => {
     const d = new Date(ts * 1000);
-    const now = new Date()
     const month = d.toLocaleString('default', { month: "long" });
-    return month + " " + d.getDate() + ((now.getFullYear() === d.getFullYear()) ? "" : ", " + d.getFullYear());
+    return month + " " + d.getDate() + ", " + d.getFullYear()
   }
 
   if (!videoContent) {
@@ -172,7 +187,7 @@ function VideoPost() {
                           <div>
                             <strong>Joined</strong>
                           </div>
-                          <div>{authorData.join_date}</div>
+                          <div>{formatUserJoinTimestamp(authorData.join_date)}</div>
                         </Popover.Body>
                       </Popover>
                     }

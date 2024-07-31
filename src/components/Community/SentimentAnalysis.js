@@ -1,4 +1,5 @@
-import React from 'react';
+//Author - Zeel Ravalani (B00917373)
+import React, { useState, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -8,24 +9,47 @@ import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied
 import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral';
 import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
 import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied';
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { getCommunityPostsSentiment } from '../../api/CommunityAnalysis'; 
 
-const SentimentAnalysis = () => {
-  // Sample data
-  const data = {
-    overallScore: 7.8,
-    trendData: [
-      { month: 'Jan', positive: 70, negative: 20, neutral: 10 },
-      { month: 'Feb', positive: 60, negative: 25, neutral: 15 },
-      { month: 'Mar', positive: 80, negative: 15, neutral: 5 },
-      { month: 'Apr', positive: 65, negative: 30, neutral: 5 },
-      { month: 'May', positive: 75, negative: 10, neutral: 15 },
-      { month: 'Jun', positive: 90, negative: 5, neutral: 5 },
-    ],
-  };
+/**
+ * Component to display sentiment analysis of community posts including an overall sentiment score
+ * and a trend chart showing sentiment over time.
+ * 
+ * @component
+ * @param {Object} props - React component props
+ * @param {string} props.communityId - ID of the community to fetch sentiment data for
+ * @author Zeel Ravalani
+ */
+const SentimentAnalysis = ({ communityId }) => {
+
+  // State for storing sentiment analysis data
+  const [data, setData] = useState({
+    overallScore: 0,
+    trendData: [],
+  });
+
+  useEffect(() => {
+
+    /**
+     * Fetches sentiment analysis data for the community and updates the state with the response data.
+     * 
+     * @param {Function} successCallback - Callback function for successful response
+     * @param {Function} errorCallback - Callback function for error response
+     */
+    getCommunityPostsSentiment(communityId, (response) => {
+      const sentimentData = response.data;
+      setData({
+        overallScore: sentimentData.overallScore || 0,
+        trendData: sentimentData.trendData || [],
+      });
+    }, (error) => {
+      console.error('Error fetching community posts sentiment:', error);
+    });
+  }, [communityId]);  // Re-run the effect when communityId changes
 
   return (
-    <div>
+    <div style={{ marginTop:'20px'}}>
       <Grid container spacing={5}>
         <Grid item xs={12}>
           <Card>
@@ -50,15 +74,17 @@ const SentimentAnalysis = () => {
 
       <div style={{ padding: 20, width: '100%', overflowX: 'auto' }}>
         <h2>Sentiment Trend Analysis</h2>
-        <LineChart width={window.innerWidth * 0.9} height={500} data={data.trendData}>
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="positive" stroke="#00C49F" name="Positive" />
-          <Line type="monotone" dataKey="negative" stroke="#FF0000" name="Negative" />
-          <Line type="monotone" dataKey="neutral" stroke="#FFC658" name="Neutral" />
-        </LineChart>
+        <ResponsiveContainer width="100%" height={500}>
+          <LineChart data={data.trendData}>
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="positive" stroke="#00C49F" name="Positive" />
+            <Line type="monotone" dataKey="negative" stroke="#FF0000" name="Negative" />
+            <Line type="monotone" dataKey="neutral" stroke="#FFC658" name="Neutral" />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

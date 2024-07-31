@@ -4,16 +4,12 @@
 }
 
 .custom-tag-card {
-  width: 350px;
-  height: 150px;
   color: #383f51;
   text-decoration: none;
   border-radius: 8px;
-  border-color: 383F51;
+  border-color: #383f51;
   transition: transform 0.3s ease-in-out;
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
+  height: 100%;
 }
 
 .custom-tag-card:hover {
@@ -23,16 +19,19 @@
 .custom-card-body {
   padding: 1rem;
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
-  align-items: center;
+  height: 100%;
 }
 
 .custom-tag-text {
-  color: #000000;
+  color: #000;
   font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
 }
 
 .custom-tag-count {
-  color: #000000;
-  font-size: 0.8rem;
+  color: #666;
+  font-size: 0.9rem;
 }

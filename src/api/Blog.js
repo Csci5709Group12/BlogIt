@@ -4,6 +4,7 @@ import { SERVER_HOST } from "./Config";
 export const getAllBlogs = async(getAllBlogsSuccessCb, getAllBlogsErrorCb) => {
     axios.get(`${SERVER_HOST}/blogs/get/all`)
         .then((response) => {
+          console.log("getAllBlogs: " + response)
             getAllBlogsSuccessCb(response);
         })
         .catch((error) => {
@@ -21,7 +22,7 @@ export const getBlogById = async(id, getBlogSuccessCb, getBlogErrorCb) => {
         })
 }
 
-export const createBlogPost = (blog_id, title, author, tags, image_url, content, apiSuccessCb, apiFailureCb) => {
+export const createBlogPost = (blog_id, title, author, tags, image_url, content, community_id, apiSuccessCb, apiFailureCb) => {
     const video = {
         blog_post_id: blog_id,
         title,
@@ -29,6 +30,7 @@ export const createBlogPost = (blog_id, title, author, tags, image_url, content,
         tags,
         image_url,
         content,
+        community_id,
     };
   
     axios.post(`${SERVER_HOST}/blogs/create`, video)
@@ -58,3 +60,13 @@ export const getMaxId = () => {
         });
     });
 };
+
+export const getAllBlogsByUserId = async(userId, getAllBlogsSuccessCb, getAllBlogsErrorCb) => {
+  axios.get(`${SERVER_HOST}/blogs/get/users/${userId}`)
+      .then((response) => {
+          getAllBlogsSuccessCb(response);
+      })
+      .catch((error) => {
+          getAllBlogsErrorCb(error);
+      })
+}

@@ -28,6 +28,14 @@ function Login() {
   const handleLoginSuccess = async (userCredentials) => {
     console.log(userCredentials);
     setCurrentUser(userCredentials.user);
+
+    // Store email in localStorage
+    localStorage.setItem('userId', userCredentials.user.uid);
+
+    // Log the stored email to the console
+    const storedId = localStorage.getItem('userId');
+    console.log('Stored Id:', storedId);
+
     loginSuccessSetShow(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
     navigate("/");

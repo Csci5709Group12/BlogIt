@@ -26,42 +26,56 @@ function ComposeVideo() {
   const [videoDuration, setVideoDuration] = useState("");
   const [thumbnailBlob, setThumbnailBlob] = useState(null);
 
-  const { currentUserData, setCurrentUserData } = useContext(CurrentUserDataContext);
+  const { currentUserData } = useContext(CurrentUserDataContext);
+
+  // TODO: Get tags from Mongo
+  const tags = ["web", "java", "react", "android", "programming", "blogging"];
 
   const navigate = useNavigate();
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     setSelectedVideo(file);
-
-    // Load video metadata to get duration
+  
     const videoElement = document.createElement('video');
     videoElement.preload = 'metadata';
+    
+    const videoBlobUrl = URL.createObjectURL(file);
+    videoElement.src = videoBlobUrl;
+  
     videoElement.onloadedmetadata = function () {
-      window.URL.revokeObjectURL(videoElement.src);
       const duration = videoElement.duration;
-      const minutes = Math.floor(duration / 60);
-      const seconds = Math.floor(duration % 60);
-      const formattedDuration = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-      setVideoDuration(formattedDuration);
+      
+      const minutes = Math.floor(duration.toFixed(2) / 60);
+      const seconds = Math.floor(duration.toFixed(2) % 60);
 
-      // Generate thumbnail
-      videoElement.currentTime = Math.floor(duration / 2);
+      setVideoDuration(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+      videoElement.currentTime = 1;
     };
+  
     videoElement.onseeked = function () {
-      const canvas = document.createElement('canvas');
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob((blob) => {
-        setThumbnailBlob(blob);
-      }, 'image/jpeg');
+      if (videoElement.readyState >= 2) {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+  
+        canvas.toBlob((blob) => {
+          if (blob) {
+            setThumbnailBlob(blob);
+            URL.revokeObjectURL(videoBlobUrl);
+          } else {
+            console.error("Failed to create thumbnail blob.");
+          }
+        }, 'image/jpeg');
+      }
     };
-    videoElement.src = URL.createObjectURL(file);
+  
+    videoElement.onerror = function (error) {
+      console.error("Error loading video: ", error);
+    };
   };
-
-  const tags = ["web", "java", "react", "android", "programming", "blogging"];
 
   const removeVideo = () => {
     setSelectedVideo(null);
@@ -124,7 +138,8 @@ function ComposeVideo() {
 
         const postContent = value;
 
-        createVideoPost(maxId + 1, videoURL, title, currentUserData._id, selectedTags, videoDuration, thumbnailURL, postContent, handleSuccess, handleError);
+        // TODO: Hardcoded community ID needs to be replaced with actual value
+        createVideoPost(maxId + 1, videoURL, title, currentUserData._id, selectedTags, videoDuration, thumbnailURL, postContent, 0, handleSuccess, handleError);
       } catch (error) {
         console.error("Error uploading post: ", error);
         handleError(error);

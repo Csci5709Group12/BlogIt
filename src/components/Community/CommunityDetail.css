@@ -1,14 +1,11 @@
 .community-detail-container {
-    padding-top: 17px;
-    padding-right: 25px;
-    padding-left: 75px;
-    padding-bottom: 25px;
-  }
-  
-  .analysis-button {
-    background-color: #D1BEB0;
-    color: #383F51;
-    border: none;
-    font-size: 1.25rem;
-  }
-  
+  margin-left: 200px;
+  /* Adjust based on VerticalNavBar width */
+  margin-right: 250px;
+  /* Adjust based on RightNavBar width */
+  padding-top: 20px;
+}
+
+.blog-feed-container {
+  margin-top: 20px;
+}

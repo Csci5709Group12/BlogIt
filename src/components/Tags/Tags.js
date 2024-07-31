@@ -1,38 +1,45 @@
-import React from "react";
-import { Card } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Card, Container, Row, Col } from "react-bootstrap";
 import VerticalNavBar from "../VerticalNavBar/VerticalNavBar";
 import AppNavbar from "../Navbar/Navbar";
+import { getAllTagsWithCounts } from "../../api/Tag";
 import "./Tags.css";
 
-// Hardcoded unique tags and their post counts
-const uniqueTags = [
-  { tag: "#tag1", count: "1,234 posts" },
-  { tag: "#tag2", count: "567 posts" },
-  { tag: "#tag3", count: "2,345 posts" },
-  { tag: "#tag4", count: "890 posts" },
-  { tag: "#tag5", count: "123 posts" },
-];
-
 function Tags() {
+  const [tags, setTags] = useState([]);
+
+  useEffect(() => {
+    getAllTagsWithCounts(
+      (data) => {
+        setTags(data);
+      },
+      (error) => {
+        console.error("Error fetching tags:", error);
+      }
+    );
+  }, []);
+
   return (
     <div>
       <AppNavbar />
       <VerticalNavBar />
-      <div className="tags-page-container">
+      <Container className="tags-page-container">
         <h2 className="tags-heading text-center mt-4 mb-3">Tags</h2>
-        <div className="row row-cols-1 row-cols-md-3 g-4">
-          {uniqueTags.map((item, index) => (
-            <div key={index} className="col">
+        <Row className="g-4">
+          {tags.map((item, index) => (
+            <Col key={index} xs={12} sm={6} md={4} lg={3}>
               <Card className="custom-tag-card">
                 <Card.Body className="custom-card-body">
                   <span className="custom-tag-text">{item.tag}</span>
-                  <span className="custom-tag-count">{item.count}</span>
+                  <span className="custom-tag-count">
+                    {item.count} {item.count === 1 ? "post" : "posts"}
+                  </span>
                 </Card.Body>
               </Card>
-            </div>
+            </Col>
           ))}
-        </div>
-      </div>
+        </Row>
+      </Container>
     </div>
   );
 }

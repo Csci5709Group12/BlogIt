@@ -1,22 +1,28 @@
+// Author - 
+// Modified by - Pratik Sakaria (B00954261)
+import React, { useEffect, useState } from 'react';
 import BlogFeedItem from "./BlogFeedItem";
 import "./BlogFeed.css";
-import { useEffect, useState } from "react";
-import { getAllBlogs } from "../../api/Blog";
+import axios from 'axios';
+import { SERVER_HOST } from '../../api/Config';
 
-function BlogFeed({ handleBookmarkToggle }) {
+function BlogFeed({ communityId, handleBookmarkToggle }) {
   const [blogItems, setBlogItems] = useState([]);
 
   useEffect(() => {
-    const handleSuccess = (response) => {
-      setBlogItems(response.data.blogs);
+    const fetchBlogs = async () => {
+      try {
+        const response = await axios.get(`${SERVER_HOST}/blogs/get/all`, {
+          params: { community_id: communityId }
+        });
+        setBlogItems(response.data.blogs);
+      } catch (error) {
+        console.error('Error fetching blogs:', error);
+      }
     };
 
-    const handleError = (error) => {
-      console.error('Error fetching blogs:', error);
-    };
-
-    getAllBlogs(handleSuccess, handleError);
-  }, []);
+    fetchBlogs();
+  }, [communityId]);
 
   return (
     <div className="blog-feed-container">

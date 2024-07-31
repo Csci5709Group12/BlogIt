@@ -136,7 +136,13 @@ function App() {
               />
               <Route path="/auth/action" element={<AccountAction />} />
               {/* Community-related routes */}
-              <Route path="/community" element={<CommunityPage />} />
+              <Route
+                path="/community"
+                element={
+                  currentUserData === null ? <Navigate to="/login" /> : <CommunityPage />
+                }
+              />
+              {/* <Route path="/community" element={<CommunityPage />} /> */}
               <Route path="/community/:communityId" element={<CommunityDetail />} />
               <Route path="/community/:communityId/analysis" element={<CommunityAnalysis />} />
             </Routes>

@@ -11,10 +11,12 @@ import { LinkContainer } from 'react-router-bootstrap';
 import { CurrentUserContext, CurrentUserDataContext } from '../../App';
 import { signOutUser } from '../../services/Authetication';
 import avatar from '../../img/profile_placeholder.png';
+import axios from 'axios';
 
 function AppNavbar() {
   const navigate = useNavigate();
   const [show, setShow] = useState(false);
+  const [query, setQuery] = useState('');
   const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
   const { currentUserData, setCurrentUserData } = useContext(CurrentUserDataContext);
 
@@ -35,6 +37,15 @@ function AppNavbar() {
     }
   }
 
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.get('/search', { params: { q: query } });
+      navigate('/search-results', { state: { results: response.data } });
+    } catch (error) {
+      console.error('Search error:', error);
+    }
+  };
   // Dropdown Notification
   const [open, setOpen] = useState(false);
   const [notificationSeen, setNotificationSeen] = useState(false);
@@ -67,14 +78,14 @@ function AppNavbar() {
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav" className="justify-content-between">
-        <Form inline>
+        <Form inline onSubmit={handleSearch}>
           <InputGroup>
             <FormControl
               placeholder="Search"
               aria-label="Search"
               aria-describedby="basic-addon2"
             />
-            <Button variant="outline-secondary" id="basic-addon2">
+            <Button variant="outline-secondary" id="basic-addon2" type="submit">
               <FaSearch />
             </Button>
           </InputGroup>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Container, Tab, Tabs } from 'react-bootstrap';
+import { useParams } from 'react-router-dom';
 import VerticalNavBar from "../VerticalNavBar/VerticalNavBar";
 import Header from "../Navbar/Navbar";
 import UserEngagementMetrics from './UserEngagementMetrics'; // Ensure the path is correct
@@ -12,10 +13,19 @@ import './CommunityAnalysis.css';
  *
  * This component renders the analysis sections for the community,
  * including user engagement metrics, sentiment analysis, and demographic insights.
+ * It uses tabs to switch between different analysis sections and
+ * passes the communityId from the URL to child components.
  *
  * @component
+ * @returns {JSX.Element} The rendered CommunityAnalysis component
+ * @author Zeel Ravalani
  */
 const CommunityAnalysis = () => {
+
+  // Extract communityId from the URL parameters
+  const { communityId } = useParams(); // Extract communityId from URL
+  console.log("CommunityAnalysis useParams communityId: " + communityId)
+
   return (
     <div>
       <Header />
@@ -29,13 +39,13 @@ const CommunityAnalysis = () => {
           justify
         >
           <Tab eventKey="user-engagement" title="User Engagement Metrics">
-            <UserEngagementMetrics />
+            <UserEngagementMetrics communityId={communityId} /> {/* Pass communityId as a prop */}
           </Tab>
           <Tab eventKey="sentiment-analysis" title="Sentiment Analysis">
-            <SentimentAnalysis />
+            <SentimentAnalysis communityId={communityId} />
           </Tab>
           <Tab eventKey="demographic-insights" title="Demographic Insights">
-            <DemographicInsights />
+            <DemographicInsights communityId={communityId} />
           </Tab>
         </Tabs>
       </Container>
