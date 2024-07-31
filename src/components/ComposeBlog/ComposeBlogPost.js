@@ -92,7 +92,7 @@ function ComposeBlog() {
 
         const postContent = value;
         // TODO: Need to add community ID
-        createBlogPost(maxId + 1, title, currentUserData._id, selectedTags, imageURL, postContent, communityId, handleSuccess, handleError);
+        createBlogPost(maxId + 1, title, currentUserData.id, selectedTags, imageURL, postContent, communityId, handleSuccess, handleError);
       } catch (error) {
         console.error("Error uploading post: ", error);
         handleError(error);
