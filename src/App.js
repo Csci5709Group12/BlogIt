@@ -100,16 +100,6 @@ function App() {
               <Route path="/create-video-post" element={<ComposeVideo />} />
               <Route path="/search-results" element={<SearchResults />} />
               <Route path="/contact" element={<ContactUs />} />
-              // <Route
-              //   path="/contact"
-              //   element={
-              //     currentUserData === null ? (
-              //       <Navigate to="/login" />
-              //     ) : (
-              //       <ContactUs />
-              //     )
-              //   }
-              // />
               <Route
                 path="/settings"
                 element={
