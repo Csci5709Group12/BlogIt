@@ -28,6 +28,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import AccountAction from "./components/Auth/AccountAction";
 import { getUserData } from "./api/User";
 import { BookmarkProvider } from "./context/BookmarkContext";
+import SearchResults from "./components/Navbar/SearchResults";
 
 export const CurrentUserContext = createContext(null);
 export const CurrentUserDataContext = createContext(null);
@@ -97,6 +98,7 @@ function App() {
               <Route path="/videos/:id" element={<VideoPost />} />
               <Route path="/create-blog-post" element={<ComposeBlog />} />
               <Route path="/create-video-post" element={<ComposeVideo />} />
+              <Route path="/search-results" element={<SearchResults />} />
               <Route
                 path="/contact"
                 element={

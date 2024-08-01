@@ -1,5 +1,7 @@
+// Author -
+// Modified by - Zeel Ravalani (B00917373)
 import { useParams, Link } from 'react-router-dom';
-import { Alert, Button, Card, CardBody, Container, Col, Image, Row, ListGroup, Spinner } from 'react-bootstrap';
+import { Alert, Button, Card, CardBody, Container, Col, Image, Row, ListGroup, Spinner, Modal } from 'react-bootstrap';
 import AppNavbar from '../Navbar/Navbar';
 import BlogFeedItem from '../BlogFeed/BlogFeedItem';
 import postLogo from '../../assets/post_icon.svg';
@@ -8,17 +10,29 @@ import locationIcon from '../../assets/location_icon.svg';
 import birthdayIcon from '../../assets/birthday_icon.svg';
 import communityIcon from '../../assets/community_icon.svg';
 import { useContext, useEffect, useState } from 'react';
-import { getUserDataByUsername } from '../../api/User';
+import { getUserDataByUsername, addFollower, removeFollower, getUserFollowers, getUserFollowing } from '../../api/User';
 import { getAllBlogsByUserId } from '../../api/Blog';
 import { getAllVideosByUserId } from '../../api/Video';
 import { CurrentUserDataContext } from '../../App';
 import VideoFeedItem from '../VideoFeed/VideoFeedItem';
 import avatar from '../../img/profile_placeholder.png';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import './UserProfile.css';
+
 
 function UserProfileDisplay({ userData }) {
   const { currentUserData, setCurrentUserData } = useContext(CurrentUserDataContext);
   const [userBlogItems, setUserBlogItems] = useState(null);
   const [userVideoItems, setUserVideoItems] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [followersList, setFollowersList] = useState([]);
+  const [followingList, setFollowingList] = useState([]);
+
   const formatTimestamp = (ts) => {
     const d = new Date(ts * 1000);
     const month = d.toLocaleString('default', { month: "long" });
@@ -36,7 +50,7 @@ function UserProfileDisplay({ userData }) {
     }
 
     getAllBlogsByUserId(userData.id, handleGetBlogsSuccess, handleGetBlogsError);
-  }, []);
+  }, [userData.id]);
 
   useEffect(() => {
     const handleGetVideosSuccess = (response) => {
@@ -49,7 +63,61 @@ function UserProfileDisplay({ userData }) {
     }
 
     getAllVideosByUserId(userData.id, handleGetVideosSuccess, handleGetVideosError);
-  }, []);
+  }, [userData.id]);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const followersResponse = await getUserFollowers(userData.id);
+        console.log("Followers Response:", JSON.stringify(followersResponse, null, 2));
+        setFollowersCount(followersResponse.length);
+        setFollowersList(followersResponse);
+
+        const followingResponse = await getUserFollowing(userData.id);
+        console.log("Following Response:", JSON.stringify(followingResponse, null, 2));
+        setFollowingCount(followingResponse.length);
+        setFollowingList(followingResponse);
+
+        if (currentUserData) {
+          // Check if the current user is following this user
+          const isFollowing = followersResponse.some(follower => follower.id === currentUserData.id);
+          setIsFollowing(isFollowing);
+        }
+      } catch (error) {
+        console.error('Error fetching followers or following:', error);
+      }
+    };
+
+    fetchUserDetails();
+  }, [userData.id, currentUserData]);
+
+  const handleFollowClick = async () => {
+    if (currentUserData && userData) {
+      try {
+        await addFollower(userData.id, currentUserData.id);
+        setIsFollowing(true); // Update state to reflect following status
+        setFollowersCount(followersCount + 1); // Update followers count
+        toast.success('Successfully followed the user!');
+      } catch (error) {
+        toast.error('Failed to follow the user.');
+      }
+    }
+  };
+  
+  const handleUnfollowClick = async () => {
+    if (currentUserData && userData) {
+      try {
+        await removeFollower(userData.id, currentUserData.id);
+        setIsFollowing(false); // Update state to reflect unfollowing status
+        setFollowersCount(followersCount - 1); // Update followers count
+        toast.success('Successfully unfollowed the user!');
+      } catch (error) {
+        toast.error('Failed to unfollow the user.');
+      }
+    }
+  };
+  
+
 
   return (
     <div>
@@ -109,7 +177,11 @@ function UserProfileDisplay({ userData }) {
               )}
             </Row>
             {
-              (userData && currentUserData && currentUserData._id === userData.id) ? (
+              (userData && currentUserData && currentUserData.id === userData.id) ? (
+                <>
+                  <hr />
+                </>
+              ) : (currentUserData !== null) ? (
                 <>
                   <hr />
                 </>
@@ -120,10 +192,16 @@ function UserProfileDisplay({ userData }) {
           </div>
           <div className="d-flex justify-content-center">
             {
-              (userData && currentUserData && currentUserData._id === userData.id) ? (
+              (userData && currentUserData && currentUserData.id === userData.id) ? (
                 <Link to="/settings">
                   <Button>Edit Profile</Button>
                 </Link>
+              ) : (currentUserData !== null) ? (
+                isFollowing ? (
+                  <Button onClick={handleUnfollowClick}>Unfollow</Button>
+                ) : (
+                  <Button onClick={handleFollowClick}>Follow</Button>
+                )
               ) : (
                 <></>
               )
@@ -136,6 +214,18 @@ function UserProfileDisplay({ userData }) {
           <Col md={4}>
             <Card>
               <ListGroup variant="flush" >
+                <ListGroup.Item className="highlight-item">
+                  <div className='d-flex justify-content-between align-items-center' style={{ cursor: 'pointer' }} onClick={() => setShowFollowersModal(true)}>
+                    <span className="highlight-text">Followers: {followersCount}</span>
+                    <span className="highlight-icon">👥</span>
+                  </div>
+                </ListGroup.Item>
+                <ListGroup.Item className="highlight-item">
+                  <div className='d-flex justify-content-between align-items-center' style={{ cursor: 'pointer' }} onClick={() => setShowFollowingModal(true)}>
+                    <span className="highlight-text">Following: {followingCount}</span>
+                    <span className="highlight-icon">🔗</span>
+                  </div>
+                </ListGroup.Item>
                 {
                   (userBlogItems || userVideoItems) ? (
                     <ListGroup.Item><img src={postLogo} alt="Post Logo" /> {((userBlogItems) ? userBlogItems.length : 0) + ((userVideoItems) ? userVideoItems.length : 0)} posts published</ListGroup.Item>
@@ -143,17 +233,6 @@ function UserProfileDisplay({ userData }) {
                     <></>
                   )
                 }
-                <ListGroup.Item><img src={commentLogo} alt="Comment Logo" /> 100 comments written</ListGroup.Item>
-                <ListGroup.Item><img src={communityIcon} alt="Community Logo" /> 42 communities joined</ListGroup.Item>
-              </ListGroup>
-            </Card>
-            <Card className='mt-3'>
-              <Card.Header>
-                Communities Joined
-              </Card.Header>
-              <ListGroup variant="flush" >
-                <ListGroup.Item>Marvel</ListGroup.Item>
-                <ListGroup.Item>Hiking</ListGroup.Item>
               </ListGroup>
             </Card>
           </Col>
@@ -197,20 +276,72 @@ function UserProfileDisplay({ userData }) {
                   </div>
                 </div>
               </CardBody>
-              <CardBody>
-                <Card.Title>Comments</Card.Title>
-                <ListGroup variant="flush" >
-                  <ListGroup.Item>Comment 1</ListGroup.Item>
-                  <ListGroup.Item>Comment 2</ListGroup.Item>
-                  <ListGroup.Item>Comment 3</ListGroup.Item>
-                </ListGroup>
-              </CardBody>
             </Card>
           </Col>
         </Row>
       </div>
+
+      {/* Followers Modal */}
+      <Modal show={showFollowersModal} onHide={() => setShowFollowersModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Followers</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {
+            followersList.length > 0 ? (
+              <ListGroup>
+                {
+                  followersList.map((follower) => (
+                    <ListGroup.Item key={follower.id}>
+                      <Link to={`/user/${follower.username}`}>{follower.name}</Link>
+                    </ListGroup.Item>
+                  ))
+                }
+              </ListGroup>
+            ) : (
+              <p>No followers</p>
+            )
+          }
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowFollowersModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Following Modal */}
+      <Modal show={showFollowingModal} onHide={() => setShowFollowingModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Following</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {
+            followingList.length > 0 ? (
+              <ListGroup>
+                {
+                  followingList.map((followedUser) => (
+                    <ListGroup.Item key={followedUser.id}>
+                      <Link to={`/user/${followedUser.username}`}>{followedUser.name}</Link>
+                    </ListGroup.Item>
+                  ))
+                }
+              </ListGroup>
+            ) : (
+              <p>Not following anyone</p>
+            )
+          }
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowFollowingModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      {/* Toast Container */}
+      <ToastContainer />
     </div>
-  )
+  );
 }
 
 function LoadingSpinner() {

@@ -1,20 +1,17 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { Form } from 'react-bootstrap';
-import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
-import ReactQuill from 'react-quill';
-import { Autocomplete, TextField, Chip } from '@mui/material';
+import React, { useEffect, useState, useContext } from "react";
+import { Form, Button, Card, Badge } from "react-bootstrap";
+import ReactQuill from "react-quill";
 import { ToastContainer, toast } from "react-toastify";
-import CreatePostNavbar from '../Navbar/CreatePostNavbar';
+import CreatePostNavbar from "../Navbar/CreatePostNavbar";
 import { storage } from "../../firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { CurrentUserDataContext } from '../../App';
-import 'react-quill/dist/quill.snow.css';
+import { CurrentUserDataContext } from "../../App";
+import "react-quill/dist/quill.snow.css";
 import "react-toastify/dist/ReactToastify.css";
-import './ComposeBlogPost.css';
-import '../common.css';
-import { createBlogPost, getMaxId } from '../../api/Blog';
-import { useNavigate, useLocation } from 'react-router-dom';
+import "./ComposeBlogPost.css";
+import "../common.css";
+import { createBlogPost, getMaxId } from "../../api/Blog";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function ComposeBlog() {
   const [value, setValue] = useState("");
@@ -24,10 +21,11 @@ function ComposeBlog() {
   const [titleError, setTitleError] = useState("");
   const [contentError, setContentError] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
+  const [tagError, setTagError] = useState("");
   const { currentUserData } = useContext(CurrentUserDataContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const communityId = new URLSearchParams(location.search).get('community_id');
+  const communityId = new URLSearchParams(location.search).get("community_id");
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -42,9 +40,6 @@ function ComposeBlog() {
   useEffect(() => {
     document.title = "Compose Blog Post";
   }, []);
-
-  // TODO: Get tags from Mongo
-  const tags = ["web", "java", "react", "android", "programming"];
 
   const removeImage = () => {
     setSelectedImageFile(null);
@@ -72,7 +67,7 @@ function ComposeBlog() {
       setTitleError("");
     }
 
-    if (!value.trim() || value === '<p><br></p>') {
+    if (!value.trim() || value === "<p><br></p>") {
       setContentError("Content cannot be blank or contain only spaces.");
       hasError = true;
     } else {
@@ -81,18 +76,33 @@ function ComposeBlog() {
 
     if (!hasError) {
       try {
-        let imageURL = '';
+        let imageURL = "";
         const maxId = await getMaxId();
 
         if (selectedImageFile) {
-          const imageRef = ref(storage, `images/blogs/${selectedImageFile.name}`);
+          const imageRef = ref(
+            storage,
+            `images/blogs/${selectedImageFile.name}`
+          );
           await uploadBytes(imageRef, selectedImageFile);
           imageURL = await getDownloadURL(imageRef);
         }
 
         const postContent = value;
+
+        console.log("Author id is: " , currentUserData.id)
         // TODO: Need to add community ID
-        createBlogPost(maxId + 1, title, currentUserData._id, selectedTags, imageURL, postContent, communityId, handleSuccess, handleError);
+        createBlogPost(
+          maxId + 1,
+          title,
+          currentUserData.id,
+          selectedTags,
+          imageURL,
+          postContent,
+          communityId,
+          handleSuccess,
+          handleError
+        );
       } catch (error) {
         console.error("Error uploading post: ", error);
         handleError(error);
@@ -110,7 +120,7 @@ function ComposeBlog() {
       setTitleError("");
     }
 
-    if (!value.trim() || value === '<p><br></p>') {
+    if (!value.trim() || value === "<p><br></p>") {
       setContentError("Content cannot be blank or contain only spaces.");
       hasError = true;
     } else {
@@ -123,12 +133,27 @@ function ComposeBlog() {
     }
   };
 
-  const handleTagsChange = (event, newValue) => {
-    if (!Array.isArray(newValue)) {
-      newValue = [newValue];
+  const handleTagsChange = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const newTag = event.target.value.trim();
+
+      if (newTag !== "") {
+        if (newTag.length > 15) {
+          setTagError("Tag cannot exceed 15 characters.");
+        } else {
+          setSelectedTags([...selectedTags, newTag]);
+          setTagError("");
+          event.target.value = "";
+        }
+      }
     }
-    const formattedTags = newValue.map(tag => tag.startsWith('#') ? tag : `#${tag}`);
-    setSelectedTags(formattedTags);
+  };
+
+  const handleTagDelete = (tagToDelete) => {
+    setSelectedTags((prevTags) =>
+      prevTags.filter((tag) => tag !== tagToDelete)
+    );
   };
 
   return (
@@ -141,28 +166,43 @@ function ComposeBlog() {
               type="file"
               accept="image/*"
               id="fileInput"
-              style={{ display: 'none' }}
+              style={{ display: "none" }}
               onChange={handleFileChange}
             />
             <Button
               variant="outline-primary"
               className="cover-btn"
-              onClick={() => document.getElementById('fileInput').click()}
+              onClick={() => document.getElementById("fileInput").click()}
             >
               Add a cover image
             </Button>
             {selectedImageFile && (
               <div className="image-container">
-                <img src={selectedImagePreview} alt="Selected" className="thumbnail" />
+                <img
+                  src={selectedImagePreview}
+                  alt="Selected"
+                  className="thumbnail"
+                />
                 <div>
-                  <Button variant="danger" style={{ margin: "10px" }} onClick={removeImage}>Remove</Button>
-                  <Button variant="secondary" onClick={() => document.getElementById('fileInput').click()}>Change</Button>
+                  <Button
+                    variant="danger"
+                    style={{ margin: "10px" }}
+                    onClick={removeImage}
+                  >
+                    Remove
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => document.getElementById("fileInput").click()}
+                  >
+                    Change
+                  </Button>
                 </div>
               </div>
             )}
             <Form.Control
               className="blog-title-form"
-              style={{ fontWeight: 'bold' }}
+              style={{ fontWeight: "bold" }}
               size="lg"
               type="text"
               placeholder="New post title here..."
@@ -174,37 +214,35 @@ function ComposeBlog() {
               {titleError}
             </Form.Control.Feedback>
 
-            <Autocomplete
-              id="tags-autocomplete"
-              freeSolo
-              multiple
-              options={tags.map((option) => `#${option}`)}
-              value={selectedTags}
-              onChange={handleTagsChange}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Chip
+            <Form.Group controlId="formTags" className="mt-3">
+              <Form.Control
+                type="text"
+                placeholder="Add a tag and press Enter"
+                onKeyDown={handleTagsChange}
+                className={`custom-tag-input ${tagError ? "input-error" : ""}`}
+              />
+              {tagError && <div className="tag-error-message">{tagError}</div>}
+              <div className="mt-2">
+                {selectedTags.map((tag, index) => (
+                  <Badge
                     key={index}
-                    label={option}
-                    {...getTagProps({ index })}
-                  />
-                ))
-              }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Add a tag here..."
-                  fullWidth
-                />
-              )}
-              sx={{
-                width: "100%",
-                marginBottom: "10px",
-                '& .MuiAutocomplete-listbox': {
-                  bgcolor: '#DDDBF1',
-                },
-              }}
-            />
+                    pill
+                    className="badge-style custom-tag-badge"
+                    onClick={() => handleTagDelete(tag)}
+                    style={{
+                      padding: "10px 15px",
+                      fontSize: "1.1rem",
+                      borderRadius: "12px",
+                      border: "1px solid #383F51",
+                      cursor: "pointer",
+                      marginRight: "5px",
+                    }}
+                  >
+                    {tag} &times;
+                  </Badge>
+                ))}
+              </div>
+            </Form.Group>
 
             <ReactQuill
               className="editor"
@@ -213,12 +251,22 @@ function ComposeBlog() {
               onChange={setValue}
               placeholder="Write your post content here..."
             />
-            {contentError && <div className="error-message">{contentError}</div>}
+            {contentError && (
+              <div className="error-message">{contentError}</div>
+            )}
             <div className="button-container">
-              <Button variant="outline-primary" className="publish-btn" onClick={handlePublish}>
+              <Button
+                variant="outline-primary"
+                className="publish-btn"
+                onClick={handlePublish}
+              >
                 Publish
               </Button>
-              <Button variant="outline-primary" className="save-draft-btn" onClick={handleSaveDraft}>
+              <Button
+                variant="outline-primary"
+                className="save-draft-btn"
+                onClick={handleSaveDraft}
+              >
                 Save Draft
               </Button>
             </div>

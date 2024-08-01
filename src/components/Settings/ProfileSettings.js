@@ -169,7 +169,7 @@ function ProfileSettings() {
       if (values.username !== currentUserData.username) {
         checkUsernameExists(values.username, values, handleCheckUsernameSuccess, handleCheckUsernameError);
       } else {
-        updateUserData(currentUserData._id, values, handleUpdateUserDataSuccess, handleUpdateUserDataError);
+        updateUserData(currentUserData.id, values, handleUpdateUserDataSuccess, handleUpdateUserDataError);
       }
     }
   }
@@ -178,7 +178,7 @@ function ProfileSettings() {
     if (formValues.username !== currentUserData.username) {
       checkUsernameExists(formValues.username, formValues, handleCheckUsernameSuccess, handleCheckUsernameError);
     } else {
-      updateUserData(currentUserData._id, formValues, handleUpdateUserDataSuccess, handleUpdateUserDataError);
+      updateUserData(currentUserData.id, formValues, handleUpdateUserDataSuccess, handleUpdateUserDataError);
     }
   }
 
@@ -194,7 +194,7 @@ function ProfileSettings() {
       setUpdateFailureMessage("Username is already taken! Please use another username.");
       updateFailureSetShow(true);
     } else {
-      updateUserData(currentUserData._id, formValues, handleUpdateUserDataSuccess, handleUpdateUserDataError);
+      updateUserData(currentUserData.id, formValues, handleUpdateUserDataSuccess, handleUpdateUserDataError);
     }
   }
 

@@ -139,7 +139,7 @@ function ComposeVideo() {
         const postContent = value;
 
         // TODO: Hardcoded community ID needs to be replaced with actual value
-        createVideoPost(maxId + 1, videoURL, title, currentUserData._id, selectedTags, videoDuration, thumbnailURL, postContent, 0, handleSuccess, handleError);
+        createVideoPost(maxId + 1, videoURL, title, currentUserData.id, selectedTags, videoDuration, thumbnailURL, postContent, 0, handleSuccess, handleError);
       } catch (error) {
         console.error("Error uploading post: ", error);
         handleError(error);

@@ -1,3 +1,4 @@
+//Author - Zeel Ravalani (B00917373)
 import React from "react";
 import { Container, Row, Col, Accordion } from "react-bootstrap"; // Reference: https://react-bootstrap.netlify.app/docs/components/accordion/
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Reference: https://docs.fontawesome.com/v5/web/use-with/react/

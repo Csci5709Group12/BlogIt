@@ -12,6 +12,7 @@ import { CurrentUserContext, CurrentUserDataContext } from '../../App';
 import { signOutUser } from '../../services/Authetication';
 import avatar from '../../img/profile_placeholder.png';
 import axios from 'axios';
+import { SERVER_HOST } from '../../api/Config';
 
 function AppNavbar() {
   const navigate = useNavigate();
@@ -37,15 +38,16 @@ function AppNavbar() {
     }
   }
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.get('/search', { params: { q: query } });
-      navigate('/search-results', { state: { results: response.data } });
-    } catch (error) {
-      console.error('Search error:', error);
-    }
-  };
+ const handleSearch = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await axios.get(`${SERVER_HOST}/search`, { params: { q: query } });
+    navigate('/search-results', { state: { results: response.data } });
+  } catch (error) {
+    console.error('Search error:', error);
+  }
+};
+
   // Dropdown Notification
   const [open, setOpen] = useState(false);
   const [notificationSeen, setNotificationSeen] = useState(false);
@@ -84,6 +86,8 @@ function AppNavbar() {
               placeholder="Search"
               aria-label="Search"
               aria-describedby="basic-addon2"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
             />
             <Button variant="outline-secondary" id="basic-addon2" type="submit">
               <FaSearch />
