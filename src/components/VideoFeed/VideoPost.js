@@ -77,7 +77,7 @@ function VideoPost() {
 
   const formatBlogTimestamp = (ts) => {
     // Create a Date object from the ISO 8601 string
-    const d = new Date(ts);
+    const d = new Date(ts * 1000);
     const now = new Date();
     
     // Get the month name and date
