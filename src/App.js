@@ -37,6 +37,7 @@ export function updateCurrentUserData(currentUser, setCurrentUserData) {
   const getUserSuccess = (response) => {
     console.log(response);
     setCurrentUserData(response.data);
+    localStorage.setItem("logged_in_user_data", JSON.stringify(response.data));
   };
 
   const getUserError = (error) => {
@@ -49,8 +50,12 @@ export function updateCurrentUserData(currentUser, setCurrentUserData) {
 }
 
 function App() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [currentUserData, setCurrentUserData] = useState(null);
+  const [currentUser, setCurrentUser] = useState(
+    () => localStorage.getItem('logged_in_user') !== null
+  );
+  const [currentUserData, setCurrentUserData] = useState(
+    () => localStorage.getItem('logged_in_user_data') !== null
+  );
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -59,9 +64,12 @@ function App() {
         console.log(user);
         setCurrentUser(user);
         updateCurrentUserData(user, setCurrentUserData);
+        localStorage.setItem("logged_in_user", JSON.stringify(user));
       } else {
         setCurrentUser(null);
         setCurrentUserData(null);
+        localStorage.setItem("logged_in_user", null);
+        localStorage.setItem("logged_in_user_data", null);
       }
     });
   }, []);
@@ -99,7 +107,16 @@ function App() {
               <Route path="/create-blog-post" element={<ComposeBlog />} />
               <Route path="/create-video-post" element={<ComposeVideo />} />
               <Route path="/search-results" element={<SearchResults />} />
-              <Route path="/contact" element={<ContactUs />} />
+              <Route
+                path="/contact"
+                element={
+                  currentUserData === null ? (
+                    <Navigate to="/login" />
+                  ) : (
+                    <ContactUs />
+                  )
+                }
+              />
               <Route
                 path="/settings"
                 element={

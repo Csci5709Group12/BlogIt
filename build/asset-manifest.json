@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.css": "/static/css/main.529d3a69.css",
+    "main.js": "/static/js/main.7e94a1e2.js",
+    "static/js/206.f0be1e57.chunk.js": "/static/js/206.f0be1e57.chunk.js",
+    "static/media/logo.png": "/static/media/logo.16068d112995fd4a4f21.png",
+    "static/media/birthday_icon.svg": "/static/media/birthday_icon.a49a4a7247a7d9b90b6a8bddbed3216d.svg",
+    "static/media/community_icon.svg": "/static/media/community_icon.0d607740f6a00c221d0f259c2fd76d41.svg",
+    "index.html": "/index.html",
+    "static/media/comment_icon.svg": "/static/media/comment_icon.c6d794730d01d799e9ea4b5c4f99c894.svg",
+    "static/media/post_icon.svg": "/static/media/post_icon.ac8673691ad14960d7cb79c7c5b21e0b.svg",
+    "static/media/info_icon.svg": "/static/media/info_icon.196d30c56484d31f7a37deb4c0c1fcf1.svg",
+    "static/media/icon-edit.svg": "/static/media/icon-edit.b0c7f9ebaec367bd3ae2539df8b55ff9.svg",
+    "static/media/icon-reply.svg": "/static/media/icon-reply.bfb4589d45cd96abd45e3b82f7e7bbc6.svg",
+    "static/media/icon-minus.svg": "/static/media/icon-minus.974bbdf86539a1ad6d1d839452caab3d.svg",
+    "static/media/icon-delete.svg": "/static/media/icon-delete.86cedbf2e37529f9c8f1f744254059b0.svg",
+    "static/media/location_icon.svg": "/static/media/location_icon.464eaf62fadbb3a3b56504365bbd4f30.svg",
+    "static/media/icon-plus.svg": "/static/media/icon-plus.c5df6c7ee1c02339d7c9cdc673abe59c.svg"
+  },
+  "entrypoints": [
+    "static/css/main.529d3a69.css",
+    "static/js/main.7e94a1e2.js"
+  ]
+}

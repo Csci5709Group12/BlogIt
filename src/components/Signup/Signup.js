@@ -237,6 +237,9 @@ function Signup() {
                           Sign up
                         </Button>
                       </div>
+                      <div className='mt-2'>
+                        <p>Already have an account? Log in <Link to="/login">here</Link>.</p>
+                      </div>
                     </Form>
                   )}
                 </Formik>

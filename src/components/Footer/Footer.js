@@ -1,62 +1,40 @@
 import React from 'react';
 import { Container, Grid, Typography, Link } from '@mui/material';
+import { Image } from 'react-bootstrap';
 import Box from '@mui/material/Box';
+import brandLogo from '../../img/logo.png';
 
 const Footer = () => {
   return (
     <Box
+      className='mt-5'
       component="footer"
       sx={{
         py: 3,
         px: 2,
         mt: 'auto',
-        backgroundColor: theme => 
-          theme.palette.mode === 'light' ? theme.palette.grey[200] : theme.palette.grey[800],
+        backgroundColor: "#eeedf8",
       }}
     >
       <Container maxWidth="lg">
-        <Typography variant="body1">
-          BlogIt Community — A constructive and inclusive social network for software developers. With you every step of your journey.
-        </Typography>
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Home</Typography>
+        <Grid container direction={"row"} rowSpacing={2} spacing={2}>
+          <Grid item xs>
+            <Image src={brandLogo} style={{ width: '30%' }} />
+            <div className='pt-2'>
+              <Typography variant="body1">
+                BlogIt Community — A constructive and inclusive blogging social network. With you every step of your journey.
+              </Typography>
+            </div>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Podcasts</Typography>
+          <Grid item xs>
+              <Typography variant="h6"><Link href='/'>Home</Link></Typography>
+            <Typography variant="h6"><Link href="/videos">Videos</Link></Typography>
+            <Typography variant="h6"><Link href="/tags">Tags</Link></Typography>
+            <Typography variant="h6"><Link href="/community">Community</Link></Typography>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Videos</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Tags</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Help</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Forem Shop</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">About</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Contact</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Guides</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Software comparisons</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Code of Conduct</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Privacy Policy</Typography>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="h6">Terms of use</Typography>
+          <Grid item xs>
+            <Typography variant="h6"><Link href="/faq">FAQ</Link></Typography>
+            <Typography variant="h6"><Link href="/contact">Contact Us</Link></Typography>
           </Grid>
         </Grid>
         <Box sx={{ mt: 4, textAlign: 'center' }}>
@@ -64,7 +42,7 @@ const Footer = () => {
             Built using Netlify.
           </Typography>
           <Typography variant="body2" sx={{ mt: 1 }}>
-            Made with love and ReactJS. BlogIt Community © 2016 - 2024.
+            Made with love and ReactJS. BlogIt Community © 2024.
           </Typography>
         </Box>
       </Container>

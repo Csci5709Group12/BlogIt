@@ -19,6 +19,7 @@ import avatar from '../../img/profile_placeholder.png';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './UserProfile.css';
+import Footer from '../Footer/Footer';
 
 
 function UserProfileDisplay({ userData }) {
@@ -425,6 +426,7 @@ function UserProfile() {
       <Container>
         <UserProfileDisplay userData={userData} />
       </Container>
+      <Footer/>
     </div>
   );
 }

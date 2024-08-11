@@ -149,6 +149,9 @@ function Login() {
                         <Button variant="primary" type='submit' size="lg">
                           Log in
                         </Button>
+                        <div className='mt-2'>
+                          <p>Do not have an account? Create an account <Link to="/signup">here</Link>.</p>
+                        </div>
                       </div>
                     </Form>
                   )}

@@ -6,6 +6,7 @@ import { faPen, faEdit, faComments, faCheckCircle, faUserPlus, faUserCircle } fr
 import './Faq.css'; 
 import VerticalNavBar from "../VerticalNavBar/VerticalNavBar";
 import Header from "../Navbar/Navbar";
+import Footer from "../Footer/Footer";
 
 /**
  * Faq Component
@@ -94,6 +95,7 @@ export default function Faq() {
           </Col>
         </Row>
       </Container>
+      <Footer/>
     </div>
   );
 }
